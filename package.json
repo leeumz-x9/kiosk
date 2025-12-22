@@ -1,0 +1,35 @@
+{
+  "name": "college-kiosk-promax",
+  "version": "1.0.0",
+  "description": "College Career Guidance Kiosk with AI and IoT",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "firebase deploy"
+  },
+  "keywords": ["kiosk", "education", "ai", "iot", "firebase"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mediapipe/face_detection": "^0.4.1646559665",
+    "@tensorflow/tfjs": "^4.15.0",
+    "firebase": "^10.7.1",
+    "face-api.js": "^0.22.2",
+    "three": "^0.160.0",
+    "@react-three/fiber": "^8.15.12",
+    "@react-three/drei": "^9.92.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-heatmap-grid": "^0.9.0",
+    "openai": "^4.20.1",
+    "framer-motion": "^10.16.16",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.8",
+    "firebase-tools": "^13.0.2"
+  }
+}
