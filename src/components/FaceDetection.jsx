@@ -18,7 +18,9 @@ const FaceDetection = ({ onDetected }) => {
   const [showConsent, setShowConsent] = useState(true);
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [showResultStep, setShowResultStep] = useState(0);
+  const [cooldownTime, setCooldownTime] = useState(0); // เพิ่ม cooldown timer
   const autoScanIntervalRef = useRef(null);
+  const cooldownIntervalRef = useRef(null); // เพิ่ม cooldown interval ref
 
   useEffect(() => {
     if (consentAccepted) {
@@ -31,21 +33,18 @@ const FaceDetection = ({ onDetected }) => {
       if (autoScanIntervalRef.current) {
         clearInterval(autoScanIntervalRef.current);
       }
+      if (cooldownIntervalRef.current) {
+        clearInterval(cooldownIntervalRef.current);
+      }
     };
   }, [consentAccepted]);
 
+  // แก้ไข auto scan logic - ไม่ให้สแกนอัตโนมัติเลย (ให้ user กดเอง)
   useEffect(() => {
-    if (consentAccepted && !isLoading && !detectedInfo && autoScanAttempts < 10) {
-      autoScanIntervalRef.current = setInterval(() => {
-        detectFace();
-        setAutoScanAttempts(prev => prev + 1);
-      }, 2000);
-    } else {
-      if (autoScanIntervalRef.current) {
-        clearInterval(autoScanIntervalRef.current);
-      }
+    // ปิดการสแกนอัตโนมัติ - ให้ user กดปุ่มเอง
+    if (autoScanIntervalRef.current) {
+      clearInterval(autoScanIntervalRef.current);
     }
-
     return () => {
       if (autoScanIntervalRef.current) {
         clearInterval(autoScanIntervalRef.current);
@@ -87,38 +86,69 @@ const FaceDetection = ({ onDetected }) => {
     setScanStep('');
     setShowResultStep(0);
     setAutoScanAttempts(0);
+    setCooldownTime(0); // reset cooldown
+    if (cooldownIntervalRef.current) {
+      clearInterval(cooldownIntervalRef.current);
+    }
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
   };
 
+  const startCooldown = () => {
+    setCooldownTime(10); // เริ่มที่ 10 วินาที
+    cooldownIntervalRef.current = setInterval(() => {
+      setCooldownTime(prev => {
+        if (prev <= 1) {
+          clearInterval(cooldownIntervalRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const detectFace = async () => {
-    if (!videoRef.current || isDetecting) return;
+    if (!videoRef.current || isDetecting || cooldownTime > 0) return; // เช็ค cooldown
 
     setIsDetecting(true);
     setScanProgress(0);
     setScanStep('');
 
     try {
-      setScanStep('🔍 ตรวจจับใบหน้า...');
-      setScanProgress(15);
+      // เพิ่มการจำลองการตรวจจับว่ามีใบหน้าหรือไม่
+      setScanStep('🔍 กำลังค้นหาใบหน้า...');
+      setScanProgress(10);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // จำลองการตรวจจับใบหน้า - 70% โอกาสเจอใบหน้า
+      const faceDetected = Math.random() > 0.3;
+      
+      if (!faceDetected) {
+        setScanStep('❌ ไม่พบใบหน้า กรุณายืนหน้ากล้อง');
+        setScanProgress(0);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        setIsDetecting(false);
+        return;
+      }
+
+      setScanStep('✅ พบใบหน้า! กำลังวิเคราะห์...');
+      setScanProgress(20);
       await new Promise(resolve => setTimeout(resolve, 800));
 
       setScanStep('📊 วิเคราะห์อายุ...');
-      setScanProgress(35);
+      setScanProgress(40);
       await new Promise(resolve => setTimeout(resolve, 1500));
-      // ทายอายุให้ใกล้เคียง 14-22 ปี (กลุ่มเป้าหมายวิทยาลัย)
-      const mockAge = 17 + Math.floor(Math.random() * 4); // 17-20 ปี
+      const mockAge = 17 + Math.floor(Math.random() * 4);
 
       setScanStep('👤 ระบุเพศ...');
-      setScanProgress(55);
+      setScanProgress(60);
       await new Promise(resolve => setTimeout(resolve, 1500));
-      // ทายเพศแบบสมจริง (ถ้ามี face-api จริงจะแม่นกว่า)
-      const mockGender = Math.random() > 0.48 ? 'male' : 'female'; // ใกล้เคียงสัดส่วนจริง
+      const mockGender = Math.random() > 0.48 ? 'male' : 'female';
 
       setScanStep('😊 วิเคราะห์อารมณ์...');
-      setScanProgress(75);
+      setScanProgress(80);
       await new Promise(resolve => setTimeout(resolve, 1500));
       // อารมณ์ที่สมจริงสำหรับวัยรุ่น
       const emotionRandom = Math.random();
@@ -149,7 +179,7 @@ const FaceDetection = ({ onDetected }) => {
       };
 
       setScanStep('🎯 คำนวณสาขาที่เหมาะสม...');
-      setScanProgress(90);
+      setScanProgress(95);
       await new Promise(resolve => setTimeout(resolve, 600));
       const interests = analyzeInterests(mockAge, mockGender, mockExpressions);
 
@@ -165,6 +195,9 @@ const FaceDetection = ({ onDetected }) => {
       });
 
       recordHeatmapClick(0, 0, 'face-scan');
+
+      // เริ่ม cooldown 10 วินาทีหลังสแกนเสร็จ
+      startCooldown();
 
       setTimeout(() => setShowResultStep(1), 1000);   // 1 วิ - อายุ
       setTimeout(() => setShowResultStep(2), 3000);   // 3 วิ - เพศ
@@ -366,11 +399,11 @@ const FaceDetection = ({ onDetected }) => {
               <motion.button
                 className="btn-scan"
                 onClick={detectFace}
-                disabled={isDetecting}
+                disabled={isDetecting || cooldownTime > 0} // ปิดปุ่มถ้าอยู่ใน cooldown
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {isDetecting ? '⏳ กำลังสแกน...' : '🎯 สแกนด้วยตนเอง'}
+                {isDetecting ? '⏳ กำลังสแกน...' : cooldownTime > 0 ? `⏳ รอ ${cooldownTime} วินาที` : '🎯 สแกนด้วยตนเอง'}
               </motion.button>
             </motion.div>
           )}

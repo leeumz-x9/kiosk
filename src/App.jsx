@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import FaceDetection from './components/FaceDetection';
 import Avatar3D from './components/Avatar3D';
 import CareerCards from './components/CareerCards';
 import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
+import WelcomeScreen from './components/WelcomeScreen';
 import { subscribeToPresence, updateLedStatus } from './firebase';
 import voiceService, { speak } from './voiceService';
 import './App.css';
 
 function App() {
   const [userDetected, setUserDetected] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [userDistance, setUserDistance] = useState(null); // ระยะห่างจากเซนเซอร์
+  const [currentPage, setCurrentPage] = useState('promo'); // เปลี่ยนเป็น promo แทน home
   const [detectedInterests, setDetectedInterests] = useState([]);
   const [showAvatar, setShowAvatar] = useState(false);
+  const [showAvatarFullscreen, setShowAvatarFullscreen] = useState(false);
   const [showTuition, setShowTuition] = useState(false);
+  const [idleTimer, setIdleTimer] = useState(null);
 
   useEffect(() => {
     // Initialize voice service
@@ -25,26 +29,46 @@ function App() {
     // Subscribe to Pi5 presence sensor
     const unsubscribe = subscribeToPresence((presenceData) => {
       if (presenceData && presenceData.userPresent) {
-        setUserDetected(true);
-        updateLedStatus(true);
+        const distance = presenceData.distance || 100; // cm
+        setUserDistance(distance);
         
-        // Welcome greeting with voice
-        if (!showAvatar && currentPage === 'home') {
-          speak('ยินดีต้อนรับค่ะ! พร้อมจะค้นหาสาขาที่ใช่แล้วหรือยัง?', 'th');
+        // ถ้าใกล้กว่า 1 เมตร (100 cm)
+        if (distance <= 100) {
+          setUserDetected(true);
+          updateLedStatus(true);
+          
+          // เปลี่ยนจากหน้า promo ไปหน้า home (โหมดวิเคราะห์)
+          if (currentPage === 'promo') {
+            setCurrentPage('home');
+            speak('ยินดีต้อนรับค่ะ! กรุณายืนนิ่งๆ เพื่อให้ระบบสแกนใบหน้าของคุณ', 'th');
+          }
+          
+          // Reset idle timer
+          if (idleTimer) clearTimeout(idleTimer);
+        } else {
+          // ถ้าห่างเกิน 1 เมตร
+          setUserDetected(false);
         }
       } else {
         setUserDetected(false);
+        setUserDistance(null);
         updateLedStatus(false);
-        // Reset after 5 seconds of no presence
-        setTimeout(() => {
-          setCurrentPage('home');
+        
+        // Reset หลังจาก 10 วินาที ไม่มีคน
+        const timer = setTimeout(() => {
+          setCurrentPage('promo');
           setShowAvatar(false);
-        }, 5000);
+          setShowAvatarFullscreen(false);
+        }, 10000);
+        setIdleTimer(timer);
       }
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      unsubscribe();
+      if (idleTimer) clearTimeout(idleTimer);
+    };
+  }, [currentPage, idleTimer]);
 
   const handleFaceDetected = (interests) => {
     setDetectedInterests(interests);
@@ -54,9 +78,10 @@ function App() {
   };
 
   const handleReset = () => {
-    setCurrentPage('home');
+    setCurrentPage('promo');
     setDetectedInterests([]);
     setShowAvatar(false);
+    setShowAvatarFullscreen(false);
   };
 
   const handleAvatarOpen = () => {
@@ -65,6 +90,12 @@ function App() {
 
   const handleAvatarClose = () => {
     setShowAvatar(false);
+    setShowAvatarFullscreen(false);
+  };
+
+  const handleTalkToTiw = () => {
+    setShowAvatarFullscreen(true);
+    speak('สวัสดีค่ะ! ดิฉันทิวใส ผู้ช่วยแนะแนวของวิทยาลัยล้านนา มีอะไรให้ช่วยไหมคะ?', 'th');
   };
 
   return (
@@ -89,7 +120,7 @@ function App() {
         </motion.div>
         
         <div className="header-actions">
-          {currentPage !== 'home' && (
+          {currentPage !== 'promo' && (
             <button 
               className="home-btn"
               onClick={handleReset}
@@ -104,6 +135,13 @@ function App() {
             💰 ค่าเทอม & ทุนการศึกษา
           </button>
           
+          <button 
+            className="avatar-btn"
+            onClick={handleTalkToTiw}
+          >
+            💬 คุยกับน้องทิวใส
+          </button>
+          
           {userDetected && (
             <motion.div 
               className="status-indicator"
@@ -111,7 +149,9 @@ function App() {
               animate={{ scale: 1 }}
             >
               <span className="status-dot"></span>
-              <span>ยินดีต้อนรับ</span>
+              <span>
+                {userDistance ? `${Math.round(userDistance)} cm` : 'ยินดีต้อนรับ'}
+              </span>
             </motion.div>
           )}
         </div>
@@ -119,76 +159,98 @@ function App() {
 
       {/* Main Content */}
       <main className="app-main">
-        {currentPage === 'home' && (
-          <motion.div 
-            className="home-page"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="hero-content">
-              <motion.h2 
-                className="hero-title"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                ค้นพบเส้นทาง
-                <span className="gradient-text"> อาชีพในฝัน</span>
-              </motion.h2>
-              
-              <motion.p 
-                className="hero-subtitle"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                สแกนใบหน้าเพื่อรับคำแนะนำสาขาวิชาที่เหมาะกับคุณ
-              </motion.p>
+        <AnimatePresence mode="wait">
+          {/* หน้าป้ายประชาสัมพันธ์ - วนลูปเมื่อไม่มีคน */}
+          {currentPage === 'promo' && (
+            <WelcomeScreen key="promo" />
+          )}
 
-              <motion.div
-                className="scan-area"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <FaceDetection onDetected={handleFaceDetected} />
-              </motion.div>
+          {/* หน้าโหมดสแกน - เมื่อมีคนเดินเข้ามา 1 เมตร */}
+          {currentPage === 'home' && (
+            <motion.div 
+              key="home"
+              className="home-page"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="hero-content">
+                <motion.h2 
+                  className="hero-title"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  ค้นพบเส้นทาง
+                  <span className="gradient-text"> อาชีพในฝัน</span>
+                </motion.h2>
+                
+                <motion.p 
+                  className="hero-subtitle"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {userDetected 
+                    ? 'กรุณายืนนิ่งๆ เพื่อให้ระบบสแกนใบหน้าของคุณ' 
+                    : 'กรุณาเข้าใกล้กล้อง (ระยะ 1 เมตร)'}
+                </motion.p>
 
-              <motion.button
-                className="btn-primary"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                onClick={() => setCurrentPage('explore')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                เริ่มต้นสำรวจ
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
+                <motion.div
+                  className="scan-area"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <FaceDetection 
+                    onDetected={handleFaceDetected}
+                    userDetected={userDetected}
+                    userDistance={userDistance}
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
 
-        {currentPage === 'explore' && (
-          <motion.div 
-            className="explore-page"
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-          >
-            <CareerCards 
-              suggestedInterests={detectedInterests}
-              onAvatarClick={handleAvatarOpen}
-            />
-          </motion.div>
-        )}
+          {/* หน้าแสดงสาขาที่แนะนำ */}
+          {currentPage === 'explore' && (
+            <motion.div 
+              key="explore"
+              className="explore-page"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+            >
+              <CareerCards 
+                suggestedInterests={detectedInterests}
+                onAvatarClick={handleAvatarOpen}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
-      {/* Avatar Chat */}
-      {showAvatar && (
-        <Avatar3D onClose={handleAvatarClose} interests={detectedInterests} />
-      )}
+      {/* Avatar Chat - โหมดเต็มจอ */}
+      <AnimatePresence>
+        {showAvatarFullscreen && (
+          <Avatar3D 
+            key="avatar-fullscreen"
+            onClose={handleAvatarClose} 
+            interests={detectedInterests}
+            fullscreen={true}
+          />
+        )}
+        
+        {/* Avatar Chat - โหมดปกติ (จากการกดที่การ์ดสาขา) */}
+        {showAvatar && !showAvatarFullscreen && (
+          <Avatar3D 
+            key="avatar-normal"
+            onClose={handleAvatarClose} 
+            interests={detectedInterests}
+            fullscreen={false}
+          />
+        )}
+      </AnimatePresence>
       
       {/* Tuition Info Modal */}
       {showTuition && (
