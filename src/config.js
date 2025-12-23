@@ -12,6 +12,9 @@ export const firebaseConfig = {
 // OpenAI API Key (for Avatar chat)
 export const OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";
 
+// Google Gemini API Key (for AI Chatbot)
+export const GEMINI_API_KEY = "AIzaSyBfeYBUKx7re4wOj7drifj4oXZbPe99Q0o";
+
 // Pi5 IoT Configuration
 export const PI5_CONFIG = {
   endpoint: "http://YOUR_PI5_IP:5000",
@@ -28,6 +31,7 @@ export const PI5_CONFIG = {
 // ResponsiveVoice Configuration
 export const VOICE_CONFIG = {
   enabled: true,
+  defaultLanguage: 'th', // ภาษาเริ่มต้น
   // Thai Voice - สาวอุตสาหกรรม สดใส วัยรุ่น
   thai: {
     voice: "Thai Female",
@@ -45,12 +49,10 @@ export const VOICE_CONFIG = {
   // Chinese Voice - Young female
   chinese: {
     voice: "Chinese Female",
-    rate: 1.1,
-    pitch: 1.15,
+    rate: 1.0,
+    pitch: 1.0,
     volume: 1.0
-  },
-  // Default language
-  defaultLanguage: 'th'
+  }
 };
 
 // Career Categories - สาขาที่เปิดรับสมัคร Lanna Poly (14 สาขา)

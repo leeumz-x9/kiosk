@@ -5,7 +5,7 @@ import Avatar3D from './components/Avatar3D';
 import CareerCards from './components/CareerCards';
 import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
-import { subscribeToPresence, updateLedStatus } from './firebase';
+// import { subscribeToPresence, updateLedStatus } from './firebase'; // Commented out - enable when Firebase is configured
 import voiceService, { speak } from './voiceService';
 import './App.css';
 
@@ -22,7 +22,8 @@ function App() {
       voiceService.init();
     }, 1000);
 
-    // Subscribe to Pi5 presence sensor
+    // Subscribe to Pi5 presence sensor (Commented out - enable when Pi5 and Firebase are configured)
+    /*
     const unsubscribe = subscribeToPresence((presenceData) => {
       if (presenceData && presenceData.userPresent) {
         setUserDetected(true);
@@ -44,9 +45,17 @@ function App() {
     });
 
     return () => unsubscribe();
+    */
   }, []);
 
   const handleFaceDetected = (interests) => {
+    // ถ้า user ไม่ยินยอม PDPA ให้ข้ามไปหน้าข้อมูล
+    if (interests.skipScan && interests.goToInfo) {
+      setCurrentPage('explore');
+      setDetectedInterests([]);
+      return;
+    }
+    
     setDetectedInterests(interests);
     if (interests.length > 0) {
       setCurrentPage('explore');
@@ -85,35 +94,19 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="logo-icon">🎓</div>
-          <h1 className="gradient-text">LANNA POLY</h1>
+          <div className="logo-text">
+            <h1>Lanna Polythentic College</h1>
+            <p className="logo-subtitle">Uncover Your Future</p>
+          </div>
         </motion.div>
         
         <div className="header-actions">
-          {currentPage !== 'home' && (
-            <button 
-              className="home-btn"
-              onClick={handleReset}
-            >
-              🏠 หน้าแรก
-            </button>
-          )}
           <button 
-            className="tuition-btn"
+            className="scholarships-btn"
             onClick={() => setShowTuition(true)}
           >
-            💰 ค่าเทอม & ทุนการศึกษา
+            💰 Scholarships & Fees
           </button>
-          
-          {userDetected && (
-            <motion.div 
-              className="status-indicator"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-            >
-              <span className="status-dot"></span>
-              <span>ยินดีต้อนรับ</span>
-            </motion.div>
-          )}
         </div>
       </header>
 

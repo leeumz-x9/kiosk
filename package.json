@@ -9,27 +9,35 @@
     "preview": "vite preview",
     "deploy": "firebase deploy"
   },
-  "keywords": ["kiosk", "education", "ai", "iot", "firebase"],
+  "keywords": [
+    "kiosk",
+    "education",
+    "ai",
+    "iot",
+    "firebase"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
     "@mediapipe/face_detection": "^0.4.1646559665",
-    "@tensorflow/tfjs": "^4.15.0",
-    "firebase": "^10.7.1",
-    "face-api.js": "^0.22.2",
-    "three": "^0.160.0",
-    "@react-three/fiber": "^8.15.12",
     "@react-three/drei": "^9.92.7",
+    "@react-three/fiber": "^8.15.12",
+    "@tensorflow/tfjs": "^4.15.0",
+    "@vladmandic/face-api": "^1.7.15",
+    "axios": "^1.6.2",
+    "face-api.js": "^0.22.2",
+    "firebase": "^10.7.1",
+    "framer-motion": "^10.16.16",
+    "openai": "^4.20.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-heatmap-grid": "^0.9.0",
-    "openai": "^4.20.1",
-    "framer-motion": "^10.16.16",
-    "axios": "^1.6.2"
+    "three": "^0.160.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.8",
-    "firebase-tools": "^13.0.2"
+    "firebase-tools": "^13.0.2",
+    "vite": "^5.0.8"
   }
 }

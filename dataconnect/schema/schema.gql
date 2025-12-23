@@ -1,0 +1,24 @@
+type User @table {
+  username: String!
+  email: String!
+  createdAt: Timestamp!
+  displayName: String
+  profilePictureURL: String
+}
+
+type Event @table {
+  title: String!
+  eventDate: Date!
+  location: String!
+  createdAt: Timestamp!
+  description: String
+  organizer: User!
+}
+
+type Invitation @table {
+  status: String!
+  createdAt: Timestamp!
+  invitedUser: User!
+  event: Event!
+  responseDate: Timestamp
+}

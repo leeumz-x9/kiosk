@@ -2,7 +2,7 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Text } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { OPENAI_API_KEY } from '../config';
+import geminiService, { askGemini, resetChat, getGreeting } from '../geminiService';
 import voiceService, { speak, stopSpeaking, GREETINGS, CAREER_PHRASES } from '../voiceService';
 import './Avatar3D.css';
 
@@ -86,9 +86,7 @@ function AvatarModel({ isThinking, isSpeaking }) {
 }
 
 const Avatar3D = ({ onClose, interests = [] }) => {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'สวัสดีค่ะ! ผมคือผู้ช่วยแนะแนวอาชีพ 😊 มีอะไรให้ผมช่วยไหมครับ?' }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -98,11 +96,14 @@ const Avatar3D = ({ onClose, interests = [] }) => {
   useEffect(() => {
     scrollToBottom();
     
-    // Speak greeting on mount
-    const greeting = GREETINGS[currentLanguage][0];
-    speak(greeting, currentLanguage).then(() => {
-      setIsSpeaking(false);
-    });
+    // Set greeting message (ไม่พูดทันที เพื่อหลีกเลี่ยง autoplay error)
+    const greeting = getGreeting(currentLanguage);
+    setMessages([{ role: 'assistant', content: greeting }]);
+    
+    // Reset conversation when component unmounts
+    return () => {
+      resetChat();
+    };
   }, []);
 
   const scrollToBottom = () => {
@@ -118,8 +119,12 @@ const Avatar3D = ({ onClose, interests = [] }) => {
     setIsThinking(true);
 
     try {
-      // Call OpenAI API (or mock response)
-      const response = await getChatResponse([...messages, userMessage], interests);
+      // ตรวจจับภาษาจากข้อความ
+      const detectedLang = geminiService.detectLanguage(inputMessage);
+      setCurrentLanguage(detectedLang);
+      
+      // Call Gemini AI
+      const response = await askGemini(inputMessage, detectedLang);
       
       setIsThinking(false);
       setIsSpeaking(true);
@@ -128,7 +133,7 @@ const Avatar3D = ({ onClose, interests = [] }) => {
       setMessages(prev => [...prev, assistantMessage]);
 
       // Text-to-speech with ResponsiveVoice
-      await speak(response, currentLanguage);
+      await speak(response, detectedLang);
       setIsSpeaking(false);
 
     } catch (error) {
@@ -136,7 +141,7 @@ const Avatar3D = ({ onClose, interests = [] }) => {
       setIsThinking(false);
       const errorMsg = { 
         role: 'assistant', 
-        content: 'ขออภัยครับ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' 
+        content: 'ขออภัยค่ะ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งค่ะ' 
       };
       setMessages(prev => [...prev, errorMsg]);
       await speak(errorMsg.content, currentLanguage);
@@ -144,26 +149,26 @@ const Avatar3D = ({ onClose, interests = [] }) => {
     }
   };
 
-  const getChatResponse = async (chatHistory, userInterests) => {
-    // Mock response for demo
-    // In production, call OpenAI API here
-    
-    const responses = [
-      `ตามข้อมูลที่ผมได้วิเคราะห์ คุณน่าจะสนใจสาขา${userInterests.length > 0 ? 'ด้าน' + userInterests[0] : ''} ครับ`,
-      'วิทยาลัยของเรามีหลักสูตรที่หลากหลาย ทั้งด้านเทคโนโลยี ธุรกิจ และศิลปะ',
-      'แต่ละสาขามีโอกาสในการทำงานที่ดีมาก โดยเฉพาะในยุค 4.0 นี้',
-      'คุณมีคำถามเพิ่มเติมเกี่ยวกับสาขาไหนไหมครับ?'
-    ];
-
-    return responses[Math.floor(Math.random() * responses.length)];
+  const quickQuestions = {
+    th: [
+      '📚 สาขาไหนน่าสนใจบ้าง?',
+      '💼 มีงานอะไรหลังเรียนจบ?',
+      '🎓 ค่าเทอมเท่าไหร่?',
+      '⏰ เปิดรับสมัครเมื่อไหร่?'
+    ],
+    en: [
+      '📚 What courses are available?',
+      '💼 What jobs after graduation?',
+      '🎓 How much is tuition?',
+      '⏰ When is admission open?'
+    ],
+    zh: [
+      '📚 有什么课程？',
+      '💼 毕业后有什么工作？',
+      '🎓 学费多少？',
+      '⏰ 什么时候招生？'
+    ]
   };
-
-  const quickQuestions = [
-    '📚 สาขาไหนน่าสนใจบ้าง?',
-    '💼 มีงานอะไรหลังเรียนจบ?',
-    '🎓 ค่าเทอมเท่าไหร่?',
-    '⏰ เปิดรับสมัครเมื่อไหร่?'
-  ];
 
   const handleLanguageChange = (lang) => {
     setCurrentLanguage(lang);
@@ -262,11 +267,11 @@ const Avatar3D = ({ onClose, interests = [] }) => {
 
             {/* Quick Questions */}
             <div className="quick-questions">
-              {quickQuestions.map((question, index) => (
+              {quickQuestions[currentLanguage].map((question, index) => (
                 <button
                   key={index}
                   className="quick-btn"
-                  onClick={() => setInputMessage(question)}
+                  onClick={() => setInputMessage(question.substring(2))} // Remove emoji
                 >
                   {question}
                 </button>

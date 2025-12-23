@@ -80,7 +80,10 @@ class VoiceService {
       // Stop current speech
       this.stop();
 
-      // Speak with settings
+      console.log(`Speaking in ${lang}:`, text);
+      console.log('Voice settings:', settings);
+
+      // Speak with ResponsiveVoice
       this.isSpeaking = true;
       
       responsiveVoice.speak(text, settings.voice, {
@@ -88,20 +91,31 @@ class VoiceService {
         rate: settings.rate,
         volume: settings.volume,
         onstart: () => {
-          console.log(`🔊 Speaking (${lang}):`, text);
+          console.log('🔊 เริ่มพูด:', text);
         },
         onend: () => {
           this.isSpeaking = false;
-          console.log('✅ Speech ended');
+          console.log('✅ พูดจบ');
           resolve();
         },
         onerror: (error) => {
-          this.isSpeaking = false;
-          // Ignore 'interrupted' errors (normal behavior when switching pages)
-          if (error.error !== 'interrupted') {
-            console.error('❌ Speech error:', error);
+          console.error('ResponsiveVoice error:', error);
+          // ถ้า error ลองใช้เสียงอังกฤษแทน
+          if (lang === 'zh') {
+            console.log('พยายามพูดภาษาจีนด้วยเสียงอังกฤษแทน...');
+            responsiveVoice.speak(text, 'UK English Female', {
+              pitch: 1.0,
+              rate: 1.0,
+              volume: 1.0,
+              onend: () => {
+                this.isSpeaking = false;
+                resolve();
+              }
+            });
+          } else {
+            this.isSpeaking = false;
+            resolve();
           }
-          resolve();
         }
       });
     });
