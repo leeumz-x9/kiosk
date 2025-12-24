@@ -5,9 +5,27 @@ import './TuitionInfo.css';
 
 const TuitionInfo = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('certificate'); // certificate, diploma, scholarships
+  const [showMap, setShowMap] = useState(false);
+  const [showOnlineAdmission, setShowOnlineAdmission] = useState(false);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('th-TH').format(price);
+  };
+
+  const handleMapClick = () => {
+    setShowMap(true);
+  };
+
+  const handleCloseMap = () => {
+    setShowMap(false);
+  };
+
+  const handleOnlineAdmissionClick = () => {
+    setShowOnlineAdmission(true);
+  };
+
+  const handleCloseOnlineAdmission = () => {
+    setShowOnlineAdmission(false);
   };
 
   return (
@@ -182,12 +200,23 @@ const TuitionInfo = ({ onClose }) => {
             <h4>📝 ช่องทางสมัคร</h4>
             <div className="method-list">
               {TUITION_INFO.applicationMethods.map((method) => (
-                <div key={method.method} className="method-item">
+                <div 
+                  key={method.method} 
+                  className="method-item clickable"
+                  onClick={() => {
+                    if (method.method === 'walk-in') {
+                      handleMapClick();
+                    } else if (method.method === 'online') {
+                      handleOnlineAdmissionClick();
+                    }
+                  }}
+                >
                   <span className="method-icon">{method.icon}</span>
                   <div>
                     <strong>{method.name}</strong>
                     <p>{method.description}</p>
                   </div>
+                  <span className="method-arrow">→</span>
                 </div>
               ))}
             </div>
@@ -200,6 +229,78 @@ const TuitionInfo = ({ onClose }) => {
           </div>
         </div>
       </motion.div>
+
+      {/* Online Admission Modal */}
+      <AnimatePresence>
+        {showOnlineAdmission && (
+          <motion.div 
+            className="external-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCloseOnlineAdmission}
+          >
+            <motion.div 
+              className="external-modal"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="external-header">
+                <h3>📝 สมัครเรียนออนไลน์</h3>
+                <button className="back-btn" onClick={handleCloseOnlineAdmission}>
+                  ← กลับ
+                </button>
+              </div>
+              <iframe
+                src="https://www.lannapoly.ac.th/admission/#/?from=website"
+                className="admission-iframe"
+                title="Online Admission"
+                allowFullScreen
+                loading="lazy"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Google Maps Modal */}
+      <AnimatePresence>
+        {showMap && (
+          <motion.div 
+            className="external-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCloseMap}
+          >
+            <motion.div 
+              className="external-modal"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="external-header">
+                <h3>📍 ที่ตั้งวิทยาลัย</h3>
+                <button className="back-btn" onClick={handleCloseMap}>
+                  ← กลับ
+                </button>
+              </div>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15107.211230282383!2d98.9912912!3d18.8069393!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30da3bcb57f2cda3%3A0x5a42c69f9e85016a!2z4Lin4Li04LiX4Lii4Liy4Lil4Lix4Lii4LmA4LiX4LiE4LmC4LiZ4LmC4Lil4Lii4Li14LmC4Lib4Lil4Li04LmA4LiX4LiE4LiZ4Li04LiE4Lil4Liy4LiZ4LiZ4LiyIOC5gOC4iuC4teC4ouC4h-C5g-C4q-C4oeC5iA!5e0!3m2!1sth!2sth!4v1766587427769!5m2!1sth!2sth"
+                className="admission-iframe"
+                title="Google Maps - วิทยาลัยเทคโนโลยีโปลิเทคนิคลานนา"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                style={{ border: 0 }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

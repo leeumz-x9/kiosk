@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CAREER_CATEGORIES } from '../config';
 import { recordHeatmapClick, saveSession } from '../firebase';
 import { speak, CAREER_PHRASES } from '../voiceService';
@@ -8,6 +8,7 @@ import './CareerCards.css';
 const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [showAdmission, setShowAdmission] = useState(false);
 
   useEffect(() => {
     // Save session data
@@ -22,7 +23,7 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
     recordHeatmapClick(50, 50, `career-${category.id}`);
     
     // Speak career description
-    const phrase = CAREER_PHRASES[category.id];
+    const phrase = CAREER_PHRASES[category.code];
     if (phrase) {
       speak(phrase.th, 'th');
     }
@@ -148,27 +149,31 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
             <div className="modal-content">
               <section className="modal-section">
                 <h3>📖 รายละเอียดหลักสูตร</h3>
-                <p>หลักสูตรนี้เหมาะสำหรับผู้ที่สนใจด้าน {selectedCategory.name} 
-                   มีการเรียนการสอนที่ทันสมัย เน้นภาคปฏิบัติจริง</p>
+                <p>{selectedCategory.description}</p>
               </section>
 
               <section className="modal-section">
-                <h3>💼 อาชีพที่เกี่ยวข้อง</h3>
-                <ul>
-                  <li>อาชีพหลัก 1</li>
-                  <li>อาชีพหลัก 2</li>
-                  <li>อาชีพหลัก 3</li>
-                </ul>
-              </section>
-
-              <section className="modal-section">
-                <h3>💰 รายได้โดยประมาณ</h3>
-                <p>15,000 - 50,000+ บาท/เดือน</p>
+                <h3>📚 ข้อมูลเพิ่มเติม</h3>
+                {CAREER_PHRASES[selectedCategory.code] && (
+                  <p style={{ lineHeight: '1.8', textAlign: 'justify' }}>
+                    {CAREER_PHRASES[selectedCategory.code].th}
+                  </p>
+                )}
               </section>
 
               <section className="modal-section">
                 <h3>🎓 ระยะเวลาศึกษา</h3>
-                <p>2-3 ปี (ปวช./ปวส.)</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ padding: '0.75rem', background: 'rgba(126, 200, 69, 0.1)', borderRadius: '8px', border: '1px solid rgba(126, 200, 69, 0.3)' }}>
+                    <strong>📘 ปวช. (ประกาศนียบัตรวิชาชีพ)</strong><br/>
+                    เรียน 3 ปี
+                  </div>
+                  <div style={{ padding: '0.75rem', background: 'rgba(0, 166, 81, 0.1)', borderRadius: '8px', border: '1px solid rgba(0, 166, 81, 0.3)' }}>
+                    <strong>📗 ปวส. (ประกาศนียบัตรวิชาชีพชั้นสูง)</strong><br/>
+                    เรียน 2 ปี
+                    {selectedCategory.code === 'It' && <span style={{ color: '#f59e0b', marginLeft: '0.5rem' }}>⭐ (เปิดเฉพาะ ปวส.)</span>}
+                  </div>
+                </div>
               </section>
 
               <button 
@@ -176,7 +181,7 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
                 style={{ 
                   background: `linear-gradient(135deg, ${selectedCategory.color} 0%, ${selectedCategory.color}80 100%)`
                 }}
-                onClick={() => window.open('https://www.lannapoly.ac.th/admission/#/?from=website', '_blank')}
+                onClick={() => setShowAdmission(true)}
               >
                 📝 สมัครเรียน
               </button>
@@ -184,6 +189,41 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
           </motion.div>
         </motion.div>
       )}
+
+      {/* Admission Modal */}
+      <AnimatePresence>
+        {showAdmission && (
+          <motion.div 
+            className="external-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowAdmission(false)}
+          >
+            <motion.div 
+              className="external-modal"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="external-header">
+                <h3>📝 สมัครเรียนออนไลน์</h3>
+                <button className="back-btn" onClick={() => setShowAdmission(false)}>
+                  ← กลับ
+                </button>
+              </div>
+              <iframe
+                src="https://www.lannapoly.ac.th/admission/#/?from=website"
+                className="admission-iframe"
+                title="Online Admission"
+                allowFullScreen
+                loading="lazy"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

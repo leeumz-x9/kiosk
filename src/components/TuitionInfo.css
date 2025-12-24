@@ -2,23 +2,23 @@
 .tuition-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.93);
+  backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-lg);
+  padding: 1rem;
 }
 
 .tuition-modal {
   position: relative;
   width: 100%;
-  max-width: 900px;
+  max-width: 850px;
   max-height: 85vh;
   background: var(--bg-card);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.45);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -29,14 +29,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: 1rem 1.5rem;
   background: var(--gradient-primary);
   color: white;
 }
 
 .tuition-header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -63,28 +63,28 @@
 /* Tabs */
 .tuition-tabs {
   display: flex;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-md) var(--spacing-lg);
+  gap: 0.4rem;
+  padding: 0.75rem 1rem;
   background: var(--bg-dark);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
 }
 
 .tab-btn {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 0.45rem 0.85rem;
   background: transparent;
-  border: 2px solid transparent;
-  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  border-radius: 10px;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   white-space: nowrap;
 }
 
 .tab-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.08);
   color: var(--primary-blue);
   border-color: var(--primary-blue);
 }
@@ -93,7 +93,7 @@
   background: var(--gradient-primary);
   color: white;
   border-color: transparent;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
 /* Content */
@@ -303,6 +303,36 @@
   background: rgba(59, 130, 246, 0.05);
   border-radius: var(--radius-md);
   align-items: flex-start;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.method-item.clickable {
+  cursor: pointer;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.method-item.clickable:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.method-arrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--primary-green);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.method-item.clickable:hover .method-arrow {
+  opacity: 1;
+  transform: translateY(-50%) translateX(5px);
 }
 
 .method-icon {
@@ -338,6 +368,79 @@
   border-left: 3px solid var(--primary-yellow);
 }
 
+/* External Content Modals */
+.external-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 13, 13, 0.97);
+  backdrop-filter: blur(8px);
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.external-modal {
+  position: relative;
+  width: 95%;
+  max-width: 1200px;
+  height: 90vh;
+  background: var(--bg-card);
+  border-radius: 20px;
+  border: 2px solid var(--primary-green);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.external-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 166, 81, 0.15), rgba(0, 166, 81, 0.05));
+  border-bottom: 2px solid rgba(0, 166, 81, 0.3);
+}
+
+.external-header h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.back-btn {
+  padding: 0.6rem 1.5rem;
+  background: var(--primary-green);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-btn:hover {
+  background: var(--light-green);
+  transform: translateX(-3px);
+  box-shadow: 0 4px 15px rgba(0, 166, 81, 0.4);
+}
+
+.map-iframe,
+.admission-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .tuition-modal {
@@ -357,5 +460,27 @@
 
   .benefits-list {
     grid-template-columns: 1fr;
+  }
+
+  .external-modal {
+    width: 98%;
+    height: 92vh;
+  }
+
+  .external-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .external-header h3 {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .back-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

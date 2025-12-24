@@ -3,34 +3,34 @@
 }
 
 .heatmap-toggle {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 0.45rem 0.85rem;
   background: var(--bg-card);
   border: 1px solid var(--primary-green);
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   color: var(--primary-green);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   font-family: var(--font-primary);
 }
 
 .heatmap-toggle:hover {
-  background: rgba(16, 185, 129, 0.1);
-  transform: translateY(-2px);
+  background: rgba(16, 185, 129, 0.08);
+  transform: translateY(-1.5px);
 }
 
 .heatmap-panel {
   position: absolute;
-  bottom: calc(100% + var(--spacing-sm));
+  bottom: calc(100% + 0.5rem);
   right: 0;
-  width: 420px;
+  width: 390px;
   background: var(--bg-card);
-  border: 2px solid var(--primary-green);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  border: 1.5px solid var(--primary-green);
+  border-radius: 14px;
+  padding: 0.85rem;
   box-shadow: var(--shadow-card);
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up 0.25s ease-out;
   z-index: 1000;
 }
 
