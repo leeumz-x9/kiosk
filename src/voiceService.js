@@ -12,6 +12,7 @@ class VoiceService {
     this.currentLanguage = VOICE_CONFIG.defaultLanguage;
     this.isSpeaking = false;
     this.initialized = false;
+    this.userInteracted = false; // เช็คว่า user มี interaction แล้วหรือยัง
   }
 
   /**
@@ -28,7 +29,43 @@ class VoiceService {
     responsiveVoice.init();
     this.initialized = true;
     console.log('✅ ResponsiveVoice initialized');
+    
+    // Setup user interaction listener to unlock audio
+    this.setupInteractionListener();
+    
     return true;
+  }
+
+  /**
+   * Setup listener for first user interaction to unlock audio
+   */
+  setupInteractionListener() {
+    const unlockAudio = () => {
+      if (!this.userInteracted) {
+        this.userInteracted = true;
+        console.log('✅ Audio unlocked by user interaction');
+        
+        // Try to play a silent sound to unlock audio context
+        if (responsiveVoice) {
+          responsiveVoice.speak('', 'Thai Female', {
+            volume: 0,
+            onend: () => {
+              console.log('🔓 Audio context unlocked');
+            }
+          });
+        }
+        
+        // Remove listeners after first interaction
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('touchstart', unlockAudio);
+        document.removeEventListener('keydown', unlockAudio);
+      }
+    };
+
+    // Listen for first user interaction
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    document.addEventListener('keydown', unlockAudio);
   }
 
   /**
@@ -72,6 +109,12 @@ class VoiceService {
       return Promise.resolve();
     }
 
+    // Check if user has interacted first
+    if (!this.userInteracted) {
+      console.warn('⚠️ Cannot play audio: User has not interacted with the page yet');
+      return Promise.resolve();
+    }
+
     return new Promise((resolve) => {
       // Auto-detect language if not specified
       const lang = language || this.detectLanguage(text);
@@ -86,51 +129,30 @@ class VoiceService {
       // Speak with ResponsiveVoice
       this.isSpeaking = true;
       
-      responsiveVoice.speak(text, settings.voice, {
-        pitch: settings.pitch,
-        rate: settings.rate,
-        volume: settings.volume,
-        onstart: () => {
-          console.log('🔊 เริ่มพูด:', text);
-        },
-        onend: () => {
-          this.isSpeaking = false;
-          console.log('✅ พูดจบ');
-          resolve();
-        },
-        onerror: (error) => {
-          console.error('ResponsiveVoice error:', error);
-          
-          // หยุดเสียงเดิมก่อน
-          responsiveVoice.cancel();
-          this.isSpeaking = false;
-          
-          // ถ้า error ลองใช้เสียงอังกฤษแทน
-          if (lang === 'zh') {
-            console.log('พยายามพูดภาษาจีนด้วยเสียงอังกฤษแทน...');
-            
-            // รอสักครู่ให้เสียงเดิมหยุดสนิท
-            setTimeout(() => {
-              this.isSpeaking = true;
-              responsiveVoice.speak(text, 'UK English Female', {
-                pitch: 1.0,
-                rate: 1.0,
-                volume: 1.0,
-                onend: () => {
-                  this.isSpeaking = false;
-                  resolve();
-                },
-                onerror: () => {
-                  this.isSpeaking = false;
-                  resolve();
-                }
-              });
-            }, 300);
-          } else {
+      try {
+        responsiveVoice.speak(text, settings.voice, {
+          pitch: settings.pitch,
+          rate: settings.rate,
+          volume: settings.volume,
+          onstart: () => {
+            console.log('🔊 เริ่มพูด:', text);
+          },
+          onend: () => {
+            this.isSpeaking = false;
+            console.log('✅ พูดจบ');
+            resolve();
+          },
+          onerror: (error) => {
+            console.error('❌ เกิดข้อผิดพลาดในการพูด:', error);
+            this.isSpeaking = false;
             resolve();
           }
-        }
-      });
+        });
+      } catch (error) {
+        console.error('❌ Error speaking:', error);
+        this.isSpeaking = false;
+        resolve();
+      }
     });
   }
 

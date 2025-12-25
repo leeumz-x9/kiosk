@@ -5,7 +5,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 999;
+  z-index: 10000;
   cursor: pointer;
   overflow: hidden;
 }
@@ -20,6 +20,16 @@
   overflow: hidden;
 }
 
+.slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
 .slide::before {
   content: '';
   position: absolute;
@@ -28,13 +38,15 @@
   right: 0;
   bottom: 0;
   background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  z-index: 2;
   pointer-events: none;
 }
 
 .slide-content {
   text-align: center;
   color: white;
-  z-index: 2;
+  z-index: 10;
+  position: relative;
   padding: 2rem;
   max-width: 800px;
 }

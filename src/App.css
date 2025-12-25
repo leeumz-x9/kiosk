@@ -19,37 +19,87 @@
 .gradient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(80px);
   opacity: 0.04;
   animation: float 30s infinite ease-in-out;
 }
 
 .orb-1 {
-  width: 500px;
-  height: 500px;
+  width: 300px;
+  height: 300px;
   background: radial-gradient(circle, var(--primary-green) 0%, transparent 70%);
-  top: -200px;
-  left: -200px;
+  top: -150px;
+  left: -150px;
   animation-delay: 0s;
 }
 
 .orb-2 {
-  width: 450px;
-  height: 450px;
+  width: 270px;
+  height: 270px;
   background: radial-gradient(circle, var(--primary-yellow) 0%, transparent 70%);
-  bottom: -150px;
-  right: -150px;
+  bottom: -100px;
+  right: -100px;
   animation-delay: -10s;
 }
 
 .orb-3 {
-  width: 400px;
-  height: 400px;
+  width: 240px;
+  height: 240px;
   background: radial-gradient(circle, var(--primary-blue) 0%, transparent 70%);
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
   animation-delay: -5s;
+}
+
+@media (min-width: 768px) {
+  .gradient-orb {
+    filter: blur(100px);
+  }
+  
+  .orb-1 {
+    width: 400px;
+    height: 400px;
+    top: -180px;
+    left: -180px;
+  }
+  
+  .orb-2 {
+    width: 360px;
+    height: 360px;
+    bottom: -130px;
+    right: -130px;
+  }
+  
+  .orb-3 {
+    width: 320px;
+    height: 320px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gradient-orb {
+    filter: blur(120px);
+  }
+  
+  .orb-1 {
+    width: 500px;
+    height: 500px;
+    top: -200px;
+    left: -200px;
+  }
+  
+  .orb-2 {
+    width: 450px;
+    height: 450px;
+    bottom: -150px;
+    right: -150px;
+  }
+  
+  .orb-3 {
+    width: 400px;
+    height: 400px;
+  }
 }
 
 @keyframes float {
@@ -317,7 +367,92 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+/* Extra Small Devices (Phones < 480px) */
+@media (max-width: 479px) {
+  .app-header {
+    padding: 0.5rem 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .logo-icon {
+    font-size: 1.75rem;
+  }
+  
+  .logo-text h1 {
+    font-size: 1rem;
+  }
+  
+  .logo-text .subtitle {
+    font-size: 0.7rem;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .home-btn,
+  .scholarships-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    flex: 1;
+    max-width: 150px;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .app-main {
+    padding: 1rem;
+    height: calc(100vh - 120px);
+  }
+  
+  .btn-primary {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+}
+
+/* Small Devices (Phones 480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .logo-icon {
+    font-size: 2rem;
+  }
+  
+  .logo-text h1 {
+    font-size: 1.2rem;
+  }
+  
+  .logo-text .subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .app-main {
+    padding: 1.25rem;
+  }
+}
+
+/* Medium Devices (Tablets 768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
   .hero-title {
     font-size: 2.5rem;
   }
@@ -330,7 +465,80 @@
     padding: var(--spacing-md) var(--spacing-lg);
   }
   
-  .logo h1 {
+  .logo-text h1 {
     font-size: 1.3rem;
+  }
+  
+  .logo-text .subtitle {
+    font-size: 0.8rem;
+  }
+}
+
+/* Large Devices (Desktops 1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .hero-title {
+    font-size: 2.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+}
+
+/* Extra Large Devices (Large Desktops >= 1280px) */
+@media (min-width: 1280px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+  }
+  
+  .app-header {
+    padding: 1.5rem 3rem;
+  }
+  
+  .app-main {
+    padding: 2rem 3rem;
+  }
+}
+
+/* Landscape Orientation for Mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .app-header {
+    padding: 0.5rem 1rem;
+  }
+  
+  .logo-icon {
+    font-size: 1.5rem;
+  }
+  
+  .logo-text h1 {
+    font-size: 1rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .app-main {
+    height: calc(100vh - 70px);
+    padding: 0.75rem;
+  }
+}
+
+/* Touch Device Adjustments */
+@media (hover: none) and (pointer: coarse) {
+  .home-btn,
+  .scholarships-btn,
+  .btn-primary {
+    min-height: 44px;
+    min-width: 44px;
   }
 }

@@ -5,6 +5,7 @@ import Avatar3D from './components/Avatar3D';
 import CareerCards from './components/CareerCards';
 import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
+import AdSlideshow from './components/AdSlideshow';
 // import { subscribeToPresence, updateLedStatus } from './firebase'; // Commented out - enable when Firebase is configured
 import voiceService, { speak } from './voiceService';
 import './App.css';
@@ -15,12 +16,73 @@ function App() {
   const [detectedInterests, setDetectedInterests] = useState([]);
   const [showAvatar, setShowAvatar] = useState(false);
   const [showTuition, setShowTuition] = useState(false);
+  const [isIdle, setIsIdle] = useState(true); // เริ่มต้นที่สไลด์โชว์
+  const [idleTimer, setIdleTimer] = useState(null);
+
+  // Idle timeout duration (30 seconds)
+  const IDLE_TIMEOUT = 30000;
+
+  // Reset idle timer
+  const resetIdleTimer = () => {
+    if (idleTimer) {
+      clearTimeout(idleTimer);
+    }
+    
+    const timer = setTimeout(() => {
+      setIsIdle(true);
+      // กลับไปหน้า home เมื่อ idle
+      setCurrentPage('home');
+      setShowAvatar(false);
+      setShowTuition(false);
+    }, IDLE_TIMEOUT);
+    
+    setIdleTimer(timer);
+  };
+
+  // Handle user interaction (ออกจาก idle mode)
+  const handleUserInteraction = () => {
+    if (isIdle) {
+      setIsIdle(false);
+      setCurrentPage('home');
+      resetIdleTimer(); // เริ่มนับ idle timer หลังจาก user กดจอ
+    } else {
+      resetIdleTimer(); // reset timer ถ้ากำลังใช้งานอยู่
+    }
+  };
 
   useEffect(() => {
     // Initialize voice service
     setTimeout(() => {
       voiceService.init();
     }, 1000);
+
+    // ไม่เริ่ม idle timer จนกว่า user จะกดจอครั้งแรก
+
+    // Listen for user interactions (เฉพาะเมื่อไม่ได้อยู่ใน idle mode)
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    const handleEvent = () => {
+      if (!isIdle) {
+        resetIdleTimer();
+      }
+    };
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleEvent);
+    });
+
+    // Cleanup
+    return () => {
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+      }
+      events.forEach(event => {
+        document.removeEventListener(event, handleEvent);
+      });
+    };
+  }, [isIdle]);
+
+  useEffect(() => {
 
     // Subscribe to Pi5 presence sensor (Commented out - enable when Pi5 and Firebase are configured)
     /*
@@ -49,6 +111,7 @@ function App() {
   }, []);
 
   const handleFaceDetected = (interests) => {
+    resetIdleTimer();
     // ถ้า user ไม่ยินยอม PDPA ให้ข้ามไปหน้าข้อมูล
     if (interests.skipScan && interests.goToInfo) {
       setCurrentPage('explore');
@@ -66,14 +129,17 @@ function App() {
     setCurrentPage('home');
     setDetectedInterests([]);
     setShowAvatar(false);
+    resetIdleTimer();
   };
 
   const handleAvatarOpen = () => {
     setShowAvatar(true);
+    resetIdleTimer();
   };
 
   const handleAvatarClose = () => {
     setShowAvatar(false);
+    resetIdleTimer();
   };
 
   return (
@@ -87,7 +153,7 @@ function App() {
       </div>
 
       {/* Header */}
-      <header className="app-header">
+      <header className="app-header" style={{ display: isIdle ? 'none' : 'flex' }}>
         <motion.div 
           className="logo"
           initial={{ opacity: 0, y: -20 }}
@@ -110,8 +176,13 @@ function App() {
         </div>
       </header>
 
+      {/* Ad Slideshow - แสดงเมื่อ idle */}
+      {isIdle && (
+        <AdSlideshow onInteraction={handleUserInteraction} />
+      )}
+
       {/* Main Content */}
-      <main className="app-main">
+      <main className="app-main" style={{ display: isIdle ? 'none' : 'block' }}>
         {currentPage === 'home' && (
           <motion.div 
             className="home-page"
@@ -196,7 +267,7 @@ function App() {
       )}
 
       {/* Footer */}
-      <footer className="app-footer">
+      <footer className="app-footer" style={{ display: isIdle ? 'none' : 'block' }}>
         <p>© 2025 College Career Guide - Powered by AI & IoT</p>
       </footer>
     </div>
