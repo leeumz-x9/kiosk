@@ -6,6 +6,9 @@ import CareerCards from './components/CareerCards';
 import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
 import AdSlideshow from './components/AdSlideshow';
+import KidsMode from './components/KidsMode';
+import { getAgeGroupConfig } from './config';
+import { createSession, logConversionStep, logPageTransition } from './firebaseService';
 // import { subscribeToPresence, updateLedStatus } from './firebase'; // Commented out - enable when Firebase is configured
 import voiceService, { speak } from './voiceService';
 import './App.css';
@@ -18,9 +21,31 @@ function App() {
   const [showTuition, setShowTuition] = useState(false);
   const [isIdle, setIsIdle] = useState(true); // เริ่มต้นที่สไลด์โชว์
   const [idleTimer, setIdleTimer] = useState(null);
+  const [detectedAge, setDetectedAge] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
+  const [sessionStartTime, setSessionStartTime] = useState(null);
+  const [ageGroup, setAgeGroup] = useState('ADULTS_18_PLUS'); // default age group
 
   // Idle timeout duration (30 seconds)
   const IDLE_TIMEOUT = 30000;
+
+  // Initialize session on app load
+  useEffect(() => {
+    const initSession = async () => {
+      const newSessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      setSessionId(newSessionId);
+      setSessionStartTime(Date.now());
+      sessionStorage.setItem('sessionId', newSessionId);
+      
+      // Log conversion step: visit
+      await logConversionStep('visit', newSessionId, {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+    };
+    
+    initSession();
+  }, []);
 
   // Reset idle timer
   const resetIdleTimer = () => {
@@ -119,8 +144,18 @@ function App() {
       return;
     }
     
+    // Handle age detection from face detection component
+    // Note: interests may contain age data in extended format
+    if (interests.age) {
+      setDetectedAge(interests.age);
+      const config = getAgeGroupConfig(interests.age);
+      setAgeGroup(config.id);
+    }
+    
     setDetectedInterests(interests);
     if (interests.length > 0) {
+      // Log page transition: home -> explore
+      logPageTransition(sessionId, 'home', 'explore');
       setCurrentPage('explore');
     }
   };
@@ -241,10 +276,24 @@ function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
           >
-            <CareerCards 
-              suggestedInterests={detectedInterests}
-              onAvatarClick={handleAvatarOpen}
-            />
+            {/* Age-based rendering: KidsMode for ages 3-12 */}
+            {detectedAge && detectedAge >= 3 && detectedAge < 13 ? (
+              <KidsMode 
+                careerSuggestions={detectedInterests}
+                onComplete={(selectedCareers) => {
+                  logConversionStep('clicked', sessionId, {
+                    careers: selectedCareers,
+                    ageGroup: 'KIDS_3_12'
+                  });
+                  setShowAvatar(true);
+                }}
+              />
+            ) : (
+              <CareerCards 
+                suggestedInterests={detectedInterests}
+                onAvatarClick={handleAvatarOpen}
+              />
+            )}
           </motion.div>
         )}
       </main>

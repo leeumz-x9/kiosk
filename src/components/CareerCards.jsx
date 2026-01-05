@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CAREER_CATEGORIES } from '../config';
+import { CAREER_CATEGORIES, getAgeGroupConfig } from '../config';
 import { recordHeatmapClick, saveSession } from '../firebase';
+import { logConversionStep } from '../firebaseService';
 import { speak, CAREER_PHRASES } from '../voiceService';
 import './CareerCards.css';
 
@@ -21,6 +22,13 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
   const handleCardClick = (category) => {
     setSelectedCategory(category);
     recordHeatmapClick(50, 50, `career-${category.id}`);
+    
+    // Log conversion step: clicked
+    const sessionId = sessionStorage.getItem('sessionId');
+    logConversionStep('clicked', sessionId, {
+      careerClicked: category.id,
+      careerName: category.name
+    });
     
     // Speak career description
     const phrase = CAREER_PHRASES[category.code];

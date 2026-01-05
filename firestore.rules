@@ -2,17 +2,48 @@ rules_version='2'
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 1, 22);
+    // Careers collection - Read only (public)
+    match /careers/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Tuition collection - Read only (public)
+    match /tuition/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Sessions collection - Only write from client (immutable logs)
+    match /sessions/{sessionId} {
+      allow read: if request.auth != null;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // Analytics collection - Read only (admin dashboard)
+    match /analytics/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Heatmap collection - Write from kiosk app
+    match /heatmap/{document=**} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // LED status collection - Write from Pi5 server
+    match /led_status/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Presence collection - Write from Pi5 server
+    match /presence/{document=**} {
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

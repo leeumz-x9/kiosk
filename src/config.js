@@ -55,6 +55,51 @@ export const VOICE_CONFIG = {
   }
 };
 
+// ====== AGE-BASED CONTENT CONFIGURATION ======
+export const AGE_GROUP_CONFIG = {
+  KIDS_3_7: {
+    ageRange: [3, 7],
+    uiType: 'KidsMode',
+    features: ['simple_animation', 'big_buttons', 'emoji_focused', 'no_text'],
+    requiresConsent: true,
+    layout: 'fullscreen_simplified',
+    colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3']
+  },
+  KIDS_8_12: {
+    ageRange: [8, 12],
+    uiType: 'ExploreMode',
+    features: ['interactive_games', 'career_exploration', 'simple_content', 'animation'],
+    requiresConsent: true,
+    layout: 'grid_cards',
+    colors: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c']
+  },
+  TEENS_13_18: {
+    ageRange: [13, 18],
+    uiType: 'StandardMode',
+    features: ['career_cards', 'avatar_chat', 'tuition_info', 'analytics'],
+    requiresConsent: false,
+    layout: 'standard',
+    colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
+  },
+  ADULTS_18_PLUS: {
+    ageRange: [18, 100],
+    uiType: 'ParentMode',
+    features: ['scholarship_info', 'roi_data', 'admission_requirements', 'career_stats'],
+    requiresConsent: false,
+    layout: 'parent_dashboard',
+    colors: ['#2c3e50', '#34495e', '#3498db', '#2ecc71']
+  }
+};
+
+// Get age group config by age
+export const getAgeGroupConfig = (age) => {
+  if (age >= 3 && age <= 7) return AGE_GROUP_CONFIG.KIDS_3_7;
+  if (age >= 8 && age <= 12) return AGE_GROUP_CONFIG.KIDS_8_12;
+  if (age >= 13 && age <= 18) return AGE_GROUP_CONFIG.TEENS_13_18;
+  if (age >= 18) return AGE_GROUP_CONFIG.ADULTS_18_PLUS;
+  return AGE_GROUP_CONFIG.KIDS_3_7; // Default to kids
+};
+
 // Career Categories - สาขาที่เปิดรับสมัคร Lanna Poly (14 สาขา)
 export const CAREER_CATEGORIES = [
   // === ช่างอุตสาหกรรม (8 สาขา) ===

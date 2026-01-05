@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { subscribeToHeatmap, recordHeatmapClick } from '../firebase';
+import { subscribeToHeatmap, logHeatmapClick } from '../firebaseService';
 import './Heatmap.css';
 
 const Heatmap = () => {
@@ -8,6 +8,7 @@ const Heatmap = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    // Subscribe to realtime heatmap updates
     const unsubscribe = subscribeToHeatmap((data) => {
       setHeatmapData(data);
       drawHeatmap(data);
@@ -65,10 +66,10 @@ const Heatmap = () => {
   const handleCanvasClick = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const x = (e.clientX - rect.left);
+    const y = (e.clientY - rect.top);
     
-    recordHeatmapClick(x, y, 'manual');
+    logHeatmapClick(x, y, 'admin');
   };
 
   return (

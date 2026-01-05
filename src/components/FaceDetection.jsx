@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import ScanFrame from './ScanFrame';
 import { CAREER_CATEGORIES } from '../config';
 import { recordHeatmapClick } from '../firebase';
+import { logConversionStep } from '../firebaseService';
 import './FaceDetection.css';
 
 const FaceDetection = ({ onDetected }) => {
@@ -19,6 +20,9 @@ const FaceDetection = ({ onDetected }) => {
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [showResultStep, setShowResultStep] = useState(0);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [detectedEmotion, setDetectedEmotion] = useState(null);
+  const [showParentalConsent, setShowParentalConsent] = useState(false);
+  const [parentalConsentAccepted, setParentalConsentAccepted] = useState(false);
   const autoScanIntervalRef = useRef(null);
 
   useEffect(() => {
@@ -42,22 +46,35 @@ const FaceDetection = ({ onDetected }) => {
 
   const loadModels = async () => {
     try {
+      console.log('🔄 Starting to load Face-API models...');
       const MODEL_URL = '/models';
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL),
-        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
-      ]);
+      
+      console.log('📦 Loading tinyFaceDetector...');
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+      console.log('✅ tinyFaceDetector loaded');
+      
+      console.log('📦 Loading ageGenderNet...');
+      await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
+      console.log('✅ ageGenderNet loaded');
+      
+      console.log('📦 Loading faceExpressionNet...');
+      await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+      console.log('✅ faceExpressionNet loaded');
+      
+      console.log('🎥 Starting video...');
       await startVideo();
+      console.log('✅ Models loaded successfully');
       setIsLoading(false);
     } catch (error) {
-      console.error('Error loading models:', error);
+      console.error('❌ Error loading models:', error);
+      console.error('Error details:', error.message);
       setIsLoading(false);
     }
   };
 
   const startVideo = async () => {
     try {
+      console.log('📹 Requesting camera access...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: 640, 
@@ -67,9 +84,12 @@ const FaceDetection = ({ onDetected }) => {
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        console.log('✅ Camera started');
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('❌ Error accessing camera:', error);
+      console.error('Camera error code:', error.name);
+      alert(`📷 กรุณาอนุญาตให้เข้าถึงกล้อง:\n${error.message}`);
     }
   };
 
@@ -88,13 +108,25 @@ const FaceDetection = ({ onDetected }) => {
   };
 
   const detectFace = async () => {
-    if (isDetecting || !videoRef.current) return;
+    if (isDetecting || !videoRef.current) {
+      console.warn('⚠️ detectFace: isDetecting=' + isDetecting + ', videoRef=' + (videoRef.current ? 'ready' : 'null'));
+      return;
+    }
+
+    // Check if video is actually loaded
+    if (videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
+      console.warn('⚠️ Video not ready, readyState:', videoRef.current.readyState);
+      setScanStep('⏳ กำลังเตรียมกล้อง...');
+      setTimeout(() => detectFace(), 500);
+      return;
+    }
 
     setIsDetecting(true);
     setScanProgress(0);
     setScanStep('');
 
     try {
+      console.log('🔍 Starting face detection...');
       setScanStep('🔍 กำลังตรวจจับใบหน้า...');
       setScanProgress(20);
 
@@ -108,15 +140,17 @@ const FaceDetection = ({ onDetected }) => {
         .withFaceExpressions();
 
       if (!detections) {
-        // Auto retry after 2 seconds instead of showing alert
+        console.log('⏳ No face detected, retrying...');
         setScanStep('⏳ ไม่พบใบหน้า กำลังลองใหม่...');
         setIsDetecting(false);
         setTimeout(() => {
           detectFace();
-        }, 2000);
+        }, 1000);
         return;
       }
 
+      console.log('✅ Face detected:', detections);
+      
       // Capture face image
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
@@ -138,30 +172,52 @@ const FaceDetection = ({ onDetected }) => {
       setScanStep('✅ วิเคราะห์เสร็จสิ้น');
       setScanProgress(90);
       await new Promise(resolve => setTimeout(resolve, 500));
+      
       const interests = analyzeInterests(age, gender, expressions);
+      const dominantEmotion = Object.keys(expressions).reduce((a, b) => 
+        expressions[a] > expressions[b] ? a : b
+      );
+      setDetectedEmotion(dominantEmotion);
 
       setScanProgress(100);
       setScanStep('✅ เสร็จสมบูรณ์');
       await new Promise(resolve => setTimeout(resolve, 400));
       
-      setDetectedInfo({
+      // Store detected info
+      const detectedData = {
         age,
         gender,
         expressions,
-        interests
+        interests,
+        emotion: dominantEmotion
+      };
+      
+      // Log conversion step: scanned
+      await logConversionStep('scanned', sessionStorage.getItem('sessionId') || 'temp-session', {
+        age,
+        gender,
+        emotion: dominantEmotion
       });
-
+      
+      setDetectedInfo(detectedData);
       recordHeatmapClick(0, 0, 'face-scan');
 
-      setTimeout(() => setShowResultStep(1), 1000);
-      setTimeout(() => setShowResultStep(2), 3000);
-      setTimeout(() => setShowResultStep(3), 5500);
-      setTimeout(() => {
-        setShowResultStep(4);
-        if (onDetected) {
-          onDetected(interests);
-        }
-      }, 8000);
+      // Check if parental consent is needed (age < 13)
+      if (age < 13) {
+        setShowParentalConsent(true);
+        setShowResultStep(0);
+      } else {
+        setTimeout(() => setShowResultStep(1), 1000);
+        setTimeout(() => setShowResultStep(2), 3000);
+        setTimeout(() => setShowResultStep(3), 5500);
+        setTimeout(() => {
+          setShowResultStep(4);
+          if (onDetected) {
+            onDetected(interests);
+          }
+        }, 8000);
+      }
+
     } catch (error) {
       console.error('Error detecting face:', error);
     }
@@ -309,7 +365,99 @@ const FaceDetection = ({ onDetected }) => {
         </motion.div>
       )}
 
-      {consentAccepted && !detectedInfo && (
+      {showParentalConsent && detectedInfo && detectedInfo.age < 13 && (
+        <motion.div 
+          className="parental-consent-modal"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+        >
+          <div className="parental-consent-card">
+            <div className="parental-header">
+              <div className="parental-icon">👨‍👩‍👧‍👦</div>
+              <h2 className="parental-title">Parent/Guardian Permission Required</h2>
+              <p className="parental-subtitle">This feature requires parental consent</p>
+            </div>
+            
+            <div className="parental-body">
+              <div className="child-info">
+                <h3>Detected Information:</h3>
+                <p><strong>Age:</strong> {detectedInfo.age} years old</p>
+                <p><strong>Gender:</strong> {detectedInfo.gender === 'male' ? 'Male' : 'Female'}</p>
+                <p><strong>Mood:</strong> {getDominantExpression(detectedInfo.expressions)}</p>
+              </div>
+
+              <div className="parental-notice">
+                <p><strong>📋 What We Will Do:</strong></p>
+                <ul>
+                  <li>Show age-appropriate career recommendations</li>
+                  <li>Track engagement with interactive content</li>
+                  <li>Display gamified learning interface</li>
+                </ul>
+              </div>
+
+              <div className="parental-privacy">
+                <p><strong>🔒 Privacy Assurance:</strong></p>
+                <ul>
+                  <li>No personal data is permanently stored</li>
+                  <li>Face image deleted after analysis</li>
+                  <li>No external data sharing</li>
+                  <li>PDPA compliant</li>
+                </ul>
+              </div>
+
+              <label className="parental-checkbox">
+                <input 
+                  type="checkbox" 
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setParentalConsentAccepted(true);
+                    }
+                  }}
+                />
+                <span>I am the parent/guardian and I consent to this experience</span>
+              </label>
+            </div>
+            
+            <div className="parental-actions">
+              <button 
+                className="btn btn-decline"
+                onClick={() => {
+                  setShowParentalConsent(false);
+                  resetScan();
+                  if (onDetected) {
+                    onDetected({
+                      skipScan: true,
+                      goToInfo: true
+                    });
+                  }
+                }}
+              >
+                Not Now
+              </button>
+              <button 
+                className="btn btn-accept"
+                disabled={!parentalConsentAccepted}
+                onClick={() => {
+                  setShowParentalConsent(false);
+                  setTimeout(() => setShowResultStep(1), 500);
+                  setTimeout(() => setShowResultStep(2), 2000);
+                  setTimeout(() => setShowResultStep(3), 4000);
+                  setTimeout(() => {
+                    setShowResultStep(4);
+                    if (onDetected) {
+                      onDetected(detectedInfo.interests);
+                    }
+                  }, 6000);
+                }}
+              >
+                I Agree & Continue
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {consentAccepted && !detectedInfo && !showParentalConsent && (
         <div className="scanning-view">
           <div className="scan-header">
             <h2 className="scan-title">Face Detection</h2>
@@ -351,8 +499,17 @@ const FaceDetection = ({ onDetected }) => {
             <p className="scan-status">
               {isDetecting ? scanStep || 'Analyzing...' : isLoading ? 'Loading AI Models...' : 'Ready to Scan'}
             </p>
+            
+            {!isDetecting && !isLoading && (
+              <button 
+                className="btn-scan-manual"
+                onClick={detectFace}
+              >
+                🔍 Start Scan
+              </button>
+            )}
           </div>
-
+          {/* Face canvas for detection */}
           <canvas ref={canvasRef} style={{ display: 'none' }} />
         </div>
       )}
