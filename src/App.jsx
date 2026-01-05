@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import FaceDetection from './components/FaceDetection';
-import Avatar3D from './components/Avatar3D';
+import AvatarVideo from './components/AvatarVideo';
 import CareerCards from './components/CareerCards';
 import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
@@ -300,7 +300,7 @@ function App() {
 
       {/* Avatar Chat */}
       {showAvatar && (
-        <Avatar3D onClose={handleAvatarClose} interests={detectedInterests} />
+        <AvatarVideo onClose={handleAvatarClose} interests={detectedInterests} />
       )}
       
       {/* Tuition Info Modal */}

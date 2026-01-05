@@ -70,7 +70,7 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
         </div>
 
         <button className="avatar-btn" onClick={onAvatarClick}>
-          🤖 พูดคุยกับผู้ช่วย
+          💬 พูดคุยกับน้องทิวสน
         </button>
       </div>
 
