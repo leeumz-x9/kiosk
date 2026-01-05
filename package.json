@@ -1,4 +1,23 @@
 {
+  "name": "college-kiosk-promax",
+  "version": "1.0.0",
+  "description": "College Career Guidance Kiosk with AI and IoT",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "keywords": [
+    "kiosk",
+    "education",
+    "ai",
+    "iot",
+    "firebase"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "firebase": "^12.7.0"
   }
