@@ -1,0 +1,52 @@
+mutation CreateSeedData @transaction @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      username: "demouser1",
+      email: "demouser1@example.com",
+      createdAt: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      username: "demouser2",
+      email: "demouser2@example.com",
+      createdAt: "2024-01-01T00:00:00Z"
+    }
+  ])
+  event_insertMany(data: [
+    {
+      id: "650e8400-e29b-41d4-a716-446655440002",
+      organizerId: "550e8400-e29b-41d4-a716-446655440000",
+      title: "Demo Event 1",
+      description: "This is a demo event",
+      location: "Demo Location",
+      eventDate: "2024-02-01",
+      createdAt: "2024-01-15T00:00:00Z"
+    },
+    {
+      id: "650e8400-e29b-41d4-a716-446655440003",
+      organizerId: "550e8400-e29b-41d4-a716-446655440001",
+      title: "Demo Event 2",
+      description: "This is another demo event",
+      location: "Another Demo Location",
+      eventDate: "2024-03-01",
+      createdAt: "2024-01-15T00:00:00Z"
+    }
+  ])
+  invitation_insertMany(data: [
+    {
+      id: "750e8400-e29b-41d4-a716-446655440004",
+      eventId: "650e8400-e29b-41d4-a716-446655440002",
+      invitedUserId: "550e8400-e29b-41d4-a716-446655440001",
+      status: "pending",
+      createdAt: "2024-01-20T00:00:00Z"
+    },
+    {
+      id: "750e8400-e29b-41d4-a716-446655440005",
+      eventId: "650e8400-e29b-41d4-a716-446655440003",
+      invitedUserId: "550e8400-e29b-41d4-a716-446655440000",
+      status: "accepted",
+      createdAt: "2024-01-20T00:00:00Z"
+    }
+  ])
+}

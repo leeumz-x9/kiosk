@@ -1,0 +1,307 @@
+:root {
+  /* Theme Colors - Cyberpunk Neon Green Style */
+  --primary-green: #7EC845; /* Neon Green */
+  --primary-yellow: #C8FF00; /* Neon Yellow-Green */
+  --primary-blue: #00FF9F; /* Cyan Green */
+  --accent-red: #FF3366;
+  
+  /* Secondary Colors */
+  --dark-green: #5A9930;
+  --light-green: #9FE657;
+  --dark-yellow: #A0CC00;
+  --light-yellow: #E0FF80;
+  --dark-blue: #00CC7F;
+  --light-blue: #66FFB8;
+  
+  /* Neutral Colors - Pure Dark Cyberpunk */
+  --bg-dark: #0D0D0D; /* Almost Black */
+  --bg-card: #1A1A1A; /* Dark Gray */
+  --bg-overlay: rgba(13, 13, 13, 0.95);
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  
+  /* Gradients - Neon Green Style */
+  --gradient-primary: linear-gradient(135deg, #7EC845 0%, #C8FF00 100%);
+  --gradient-secondary: linear-gradient(135deg, #C8FF00 0%, #7EC845 100%);
+  --gradient-accent: linear-gradient(135deg, #00FF9F 0%, #7EC845 100%);
+  --gradient-hero: linear-gradient(135deg, #7EC845 0%, #C8FF00 50%, #00FF9F 100%);
+  --gradient-scan: linear-gradient(90deg, transparent 0%, #C8FF00 50%, transparent 100%);
+  --gradient-overlay: linear-gradient(180deg, rgba(13, 13, 13, 0) 0%, rgba(13, 13, 13, 0.9) 100%);
+  
+  /* Shadows - Neon Glow */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.7);
+  --shadow-glow-yellow: 0 0 30px rgba(200, 255, 0, 0.8);
+  --shadow-glow-green: 0 0 30px rgba(126, 200, 69, 0.8);
+  --shadow-glow-cyan: 0 0 20px rgba(126, 200, 69, 0.6), 0 0 40px rgba(200, 255, 0, 0.4);
+  --shadow-neon: 0 0 10px #C8FF00, 0 0 20px #C8FF00, 0 0 30px #7EC845;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-full: 9999px;
+  
+  /* Typography */
+  --font-primary: 'Kanit', 'Segoe UI', sans-serif;
+  
+  /* Responsive Breakpoints */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(126, 200, 69, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(200, 255, 0, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(0, 255, 159, 0.02) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 200px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='%237EC845' fill-opacity='0.05' d='M0,0 C150,80 350,80 600,40 C850,0 1050,0 1200,40 L1200,120 L0,120 Z'/%3E%3C/svg%3E");
+  background-size: 50% 100%;
+  animation: wave 15s linear infinite;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Animations */
+@keyframes wave {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: var(--shadow-glow-yellow);
+  }
+  50% {
+    box-shadow: var(--shadow-neon);
+  }
+}
+
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    filter: brightness(1);
+    text-shadow: 0 0 10px #C8FF00, 0 0 20px #C8FF00;
+  }
+  50% {
+    filter: brightness(1.3);
+    text-shadow: 0 0 20px #C8FF00, 0 0 30px #7EC845, 0 0 40px #7EC845;
+  }
+}
+
+@keyframes corner-glow {
+  0%, 100% {
+    box-shadow: -5px -5px 15px rgba(200, 255, 0, 0.5);
+  }
+  50% {
+    box-shadow: -5px -5px 25px rgba(126, 200, 69, 0.7);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes blink {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0.3;
+  }
+}
+
+/* Utility Classes */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-effect {
+  background: rgba(20, 27, 46, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glow-effect {
+  animation: pulse-glow 2s infinite;
+}
+
+.fade-in {
+  animation: slide-up 0.6s ease-out;
+}
+
+/* Responsive Utilities */
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 960px;
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* Responsive Text Sizes */
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Responsive Display */
+.mobile-only {
+  display: block;
+}
+
+.tablet-up {
+  display: none;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+  .tablet-up {
+    display: block;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-only {
+    display: block;
+  }
+}

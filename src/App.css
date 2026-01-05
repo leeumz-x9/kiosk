@@ -1,0 +1,544 @@
+.app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0d5f3a 0%, #094a2e 100%);
+}
+
+.app-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.04;
+  animation: float 30s infinite ease-in-out;
+}
+
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--primary-green) 0%, transparent 70%);
+  top: -150px;
+  left: -150px;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 270px;
+  height: 270px;
+  background: radial-gradient(circle, var(--primary-yellow) 0%, transparent 70%);
+  bottom: -100px;
+  right: -100px;
+  animation-delay: -10s;
+}
+
+.orb-3 {
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, var(--primary-blue) 0%, transparent 70%);
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -5s;
+}
+
+@media (min-width: 768px) {
+  .gradient-orb {
+    filter: blur(100px);
+  }
+  
+  .orb-1 {
+    width: 400px;
+    height: 400px;
+    top: -180px;
+    left: -180px;
+  }
+  
+  .orb-2 {
+    width: 360px;
+    height: 360px;
+    bottom: -130px;
+    right: -130px;
+  }
+  
+  .orb-3 {
+    width: 320px;
+    height: 320px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gradient-orb {
+    filter: blur(120px);
+  }
+  
+  .orb-1 {
+    width: 500px;
+    height: 500px;
+    top: -200px;
+    left: -200px;
+  }
+  
+  .orb-2 {
+    width: 450px;
+    height: 450px;
+    bottom: -150px;
+    right: -150px;
+  }
+  
+  .orb-3 {
+    width: 400px;
+    height: 400px;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+}
+
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+}
+
+.grid-overlay::after {
+  display: none;
+}
+
+/* Header */
+.app-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(13, 95, 58, 0.7);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(244, 184, 68, 0.2);
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.home-btn {
+  padding: 0.5rem 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  backdrop-filter: blur(5px);
+}
+
+.home-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+.scholarships-btn {
+  padding: 0.5rem 1.25rem;
+  background: #f4b844;
+  border: none;
+  border-radius: 50px;
+  color: #0d5f3a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(244, 184, 68, 0.2);
+}
+
+.scholarships-btn:hover {
+  background: #ffd700;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(244, 184, 68, 0.3);
+}
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+}
+
+.logo-text h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.logo-text .subtitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #f4b844;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.scholarships-btn {
+  padding: 12px 28px;
+  background: #f4b844;
+  color: #0d5f3a;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(244, 184, 68, 0.3);
+}
+
+.scholarships-btn:hover {
+  background: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 184, 68, 0.5);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--primary-green);
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  color: var(--primary-green);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Main Content */
+.app-main {
+  position: relative;
+  z-index: 5;
+  height: calc(100vh - 100px);
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Home Page */
+.home-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.hero-content {
+  text-align: center;
+  max-width: 800px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+.scan-area {
+  margin: var(--spacing-xl) auto;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Buttons */
+.btn-primary {
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--bg-dark);
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+  font-family: var(--font-primary);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Explore Page */
+.explore-page {
+  height: 100%;
+  width: 100%;
+}
+
+/* Admin Panel */
+.admin-panel {
+  position: fixed;
+  bottom: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 100;
+  background: var(--bg-card);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  max-width: 300px;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.admin-panel:hover {
+  opacity: 1;
+}
+
+/* Footer */
+.app-footer {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: var(--spacing-md);
+  background: rgba(15, 23, 42, 0.5);
+  border-top: 1px solid rgba(16, 185, 129, 0.2);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+/* Extra Small Devices (Phones < 480px) */
+@media (max-width: 479px) {
+  .app-header {
+    padding: 0.5rem 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .logo-icon {
+    font-size: 1.75rem;
+  }
+  
+  .logo-text h1 {
+    font-size: 1rem;
+  }
+  
+  .logo-text .subtitle {
+    font-size: 0.7rem;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .home-btn,
+  .scholarships-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    flex: 1;
+    max-width: 150px;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+  
+  .app-main {
+    padding: 1rem;
+    height: calc(100vh - 120px);
+  }
+  
+  .btn-primary {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+}
+
+/* Small Devices (Phones 480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .app-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .logo-icon {
+    font-size: 2rem;
+  }
+  
+  .logo-text h1 {
+    font-size: 1.2rem;
+  }
+  
+  .logo-text .subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .app-main {
+    padding: 1.25rem;
+  }
+}
+
+/* Medium Devices (Tablets 768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .app-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  
+  .logo-text h1 {
+    font-size: 1.3rem;
+  }
+  
+  .logo-text .subtitle {
+    font-size: 0.8rem;
+  }
+}
+
+/* Large Devices (Desktops 1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .hero-title {
+    font-size: 2.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+}
+
+/* Extra Large Devices (Large Desktops >= 1280px) */
+@media (min-width: 1280px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+  }
+  
+  .app-header {
+    padding: 1.5rem 3rem;
+  }
+  
+  .app-main {
+    padding: 2rem 3rem;
+  }
+}
+
+/* Landscape Orientation for Mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .app-header {
+    padding: 0.5rem 1rem;
+  }
+  
+  .logo-icon {
+    font-size: 1.5rem;
+  }
+  
+  .logo-text h1 {
+    font-size: 1rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .app-main {
+    height: calc(100vh - 70px);
+    padding: 0.75rem;
+  }
+}
+
+/* Touch Device Adjustments */
+@media (hover: none) and (pointer: coarse) {
+  .home-btn,
+  .scholarships-btn,
+  .btn-primary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

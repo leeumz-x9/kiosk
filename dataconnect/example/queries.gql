@@ -1,0 +1,36 @@
+mutation CreateUser($displayName: String!, $email: String!, $username: String!) @auth(level: USER) {
+  user_insert(data: {displayName: $displayName, email: $email, username: $username, createdAt_expr: "request.time"})
+}
+
+query GetEvents @auth(level: USER) {
+  events {
+    id
+    title
+    description
+    eventDate
+    location
+    organizer {
+      id
+      username
+      displayName
+    }
+  }
+}
+
+mutation InviteUserToEvent($eventId: UUID!, $invitedUserId: UUID!, $status: String!) @auth(level: USER) {
+  invitation_insert(data: {eventId: $eventId, invitedUserId: $invitedUserId, status: $status, createdAt_expr: "request.time"})
+}
+
+query GetInvitationsForUser @auth(level: USER) {
+  invitations(where: {invitedUserId: {eq_expr: "auth.uid"}}) {
+    id
+    event {
+      id
+      title
+      eventDate
+      location
+    }
+    status
+    responseDate
+  }
+}
