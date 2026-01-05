@@ -47,7 +47,8 @@ const FaceDetection = ({ onDetected }) => {
   const loadModels = async () => {
     try {
       console.log('🔄 Starting to load Face-API models...');
-      const MODEL_URL = '/models';
+      // ใช้ CDN แทนเพื่อความเร็วและความน่าเชื่อถือ
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
       
       console.log('📦 Loading tinyFaceDetector...');
       await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
