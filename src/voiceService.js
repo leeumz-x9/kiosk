@@ -27,6 +27,12 @@ class VoiceService {
 
     // Wait for ResponsiveVoice to be ready
     responsiveVoice.init();
+    
+    // Disable welcome message if function exists
+    if (typeof responsiveVoice.enableEstimationTimeout !== 'undefined') {
+      responsiveVoice.enableEstimationTimeout = false;
+    }
+    
     this.initialized = true;
     console.log('✅ ResponsiveVoice initialized');
     
@@ -45,15 +51,8 @@ class VoiceService {
         this.userInteracted = true;
         console.log('✅ Audio unlocked by user interaction');
         
-        // Try to play a silent sound to unlock audio context
-        if (responsiveVoice) {
-          responsiveVoice.speak('', 'Thai Female', {
-            volume: 0,
-            onend: () => {
-              console.log('🔓 Audio context unlocked');
-            }
-          });
-        }
+        // DON'T play empty text - just mark as unlocked
+        console.log('🔓 Audio context ready');
         
         // Remove listeners after first interaction
         document.removeEventListener('click', unlockAudio);
@@ -106,6 +105,12 @@ class VoiceService {
   speak(text, language = null) {
     if (!this.isEnabled || !this.initialized) {
       console.warn('Voice service not enabled or initialized');
+      return Promise.resolve();
+    }
+
+    // Check if text is empty or invalid
+    if (!text || typeof text !== 'string' || text.trim() === '') {
+      console.warn('⚠️ Cannot speak: Text is empty or invalid');
       return Promise.resolve();
     }
 

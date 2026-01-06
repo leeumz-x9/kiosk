@@ -10,6 +10,16 @@ import './AdSlideshow.css';
 
 const AdSlideshow = ({ onInteraction }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [transitionType, setTransitionType] = useState('fade');
+
+  // Transition effects pool
+  const transitions = [
+    { type: 'fade', initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } },
+    { type: 'slide', initial: { x: 100, opacity: 0 }, animate: { x: 0, opacity: 1 }, exit: { x: -100, opacity: 0 } },
+    { type: 'zoom', initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, exit: { scale: 1.2, opacity: 0 } },
+    { type: 'rotate', initial: { rotateY: 90, opacity: 0 }, animate: { rotateY: 0, opacity: 1 }, exit: { rotateY: -90, opacity: 0 } },
+    { type: 'flip', initial: { rotateX: -90, opacity: 0 }, animate: { rotateX: 0, opacity: 1 }, exit: { rotateX: 90, opacity: 0 } }
+  ];
 
   // รูปภาพโฆษณาของวิทยาลัย
   // วางรูปภาพในโฟลเดอร์ public/images/activities/
@@ -128,8 +138,10 @@ const AdSlideshow = ({ onInteraction }) => {
   ];
 
   useEffect(() => {
-    // เปลี่ยนสไลด์ทุก 5 วินาที
+    // เปลี่ยนสไลด์ทุก 5 วินาที พร้อม random transition
     const interval = setInterval(() => {
+      const randomTransition = transitions[Math.floor(Math.random() * transitions.length)];
+      setTransitionType(randomTransition.type);
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
 
@@ -144,6 +156,21 @@ const AdSlideshow = ({ onInteraction }) => {
 
   return (
     <div className="ad-slideshow" onClick={handleClick}>
+      {/* 3D Infinity Grid Container */}
+      <div className="inf-grid-hero-container">
+        <div className="inf-grid-perspective">
+          {/* Grid Lines */}
+          <div className="grid-lines">
+            {[...Array(20)].map((_, i) => (
+              <div key={`h-${i}`} className="grid-line-horizontal" style={{ top: `${i * 5}%` }} />
+            ))}
+            {[...Array(20)].map((_, i) => (
+              <div key={`v-${i}`} className="grid-line-vertical" style={{ left: `${i * 5}%` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -155,11 +182,72 @@ const AdSlideshow = ({ onInteraction }) => {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'
           }}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.8, ease: 'easeInOut' }}
+          initial={transitions.find(t => t.type === transitionType)?.initial || { opacity: 0 }}
+          animate={transitions.find(t => t.type === transitionType)?.animate || { opacity: 1 }}
+          exit={transitions.find(t => t.type === transitionType)?.exit || { opacity: 0 }}
+          transition={{ duration: 0.9, ease: [0.43, 0.13, 0.23, 0.96] }}
         >
+          {/* 3D Floating Images */}
+          <div className="floating-images-3d">
+            {slides.filter(s => s.image).slice(0, 8).map((slide, i) => (
+              <motion.div
+                key={`float-${i}`}
+                className="floating-image-card"
+                style={{
+                  backgroundImage: `url(${slide.image})`,
+                  left: `${Math.random() * 80 + 10}%`,
+                  top: `${Math.random() * 60 + 20}%`
+                }}
+                initial={{ 
+                  rotateX: Math.random() * 30 - 15,
+                  rotateY: Math.random() * 30 - 15,
+                  z: Math.random() * -500 - 100,
+                  opacity: 0
+                }}
+                animate={{ 
+                  rotateX: [null, Math.random() * 20 - 10],
+                  rotateY: [null, Math.random() * 360],
+                  z: [null, Math.random() * -300],
+                  opacity: [0, 0.7, 0.7, 0]
+                }}
+                transition={{ 
+                  duration: 8 + Math.random() * 4,
+                  repeat: Infinity,
+                  delay: i * 0.5,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Floating Particles */}
+          <div className="particles">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="particle"
+                initial={{ 
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight,
+                  scale: Math.random() * 0.5 + 0.5,
+                  opacity: 0
+                }}
+                animate={{ 
+                  y: [null, Math.random() * -200 - 100],
+                  opacity: [0, 0.6, 0],
+                  scale: [null, Math.random() * 1.5 + 0.5]
+                }}
+                transition={{ 
+                  duration: Math.random() * 3 + 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2
+                }}
+              />
+            ))}
+          </div>
+          {/* Animated Grid Background */}
+          <div className="grid-bg"></div>
+          
           {/* Overlay for better text readability */}
           {slides[currentSlide].image && (
             <div className="slide-overlay" style={{ background: slides[currentSlide].gradient }}></div>

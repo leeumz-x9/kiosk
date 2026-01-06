@@ -5,6 +5,7 @@
   max-width: 500px;
   aspect-ratio: 3/4;
   margin: 0 auto;
+  z-index: 250;
 }
 
 .tech-scan-frame {
@@ -17,6 +18,7 @@
   backdrop-filter: blur(8px);
   overflow: hidden;
   transition: border-color 0.25s ease;
+  z-index: 251;
 }
 
 /* Corner Brackets */

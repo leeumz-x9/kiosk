@@ -23,6 +23,7 @@
   position: relative;
   font-family: var(--font-primary);
   overflow: hidden;
+  z-index: 200;
 }
 
 .face-detection-container::before {

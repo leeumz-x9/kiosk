@@ -47,18 +47,18 @@ const FaceDetection = ({ onDetected }) => {
   const loadModels = async () => {
     try {
       console.log('🔄 Starting to load Face-API models...');
-      // ใช้ CDN แทนเพื่อความเร็วและความน่าเชื่อถือ
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+      // Use local models folder for better reliability
+      const MODEL_URL = '/models';
       
-      console.log('📦 Loading tinyFaceDetector...');
+      console.log('📦 Loading tinyFaceDetector from:', MODEL_URL);
       await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
       console.log('✅ tinyFaceDetector loaded');
       
-      console.log('📦 Loading ageGenderNet...');
+      console.log('📦 Loading ageGenderNet from:', MODEL_URL);
       await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
       console.log('✅ ageGenderNet loaded');
       
-      console.log('📦 Loading faceExpressionNet...');
+      console.log('📦 Loading faceExpressionNet from:', MODEL_URL);
       await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
       console.log('✅ faceExpressionNet loaded');
       
@@ -69,6 +69,7 @@ const FaceDetection = ({ onDetected }) => {
     } catch (error) {
       console.error('❌ Error loading models:', error);
       console.error('Error details:', error.message);
+      alert(`❌ ไม่สามารถโหลด AI models ได้\nกรุณาตรวจสอบว่ามีไฟล์ model ในโฟลเดอร์ /public/models/\n\nError: ${error.message}`);
       setIsLoading(false);
     }
   };
