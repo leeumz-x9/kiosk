@@ -148,15 +148,15 @@ class VoiceService {
             resolve();
           },
           onerror: (error) => {
-            console.error('❌ เกิดข้อผิดพลาดในการพูด:', error);
+            console.warn('⚠️ Speech error:', error);
             this.isSpeaking = false;
-            resolve();
+            resolve(); // Still resolve to prevent blocking
           }
         });
       } catch (error) {
-        console.error('❌ Error speaking:', error);
+        console.warn('⚠️ Speech exception:', error);
         this.isSpeaking = false;
-        resolve();
+        resolve(); // Suppress error and continue
       }
     });
   }

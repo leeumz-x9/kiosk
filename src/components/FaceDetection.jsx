@@ -27,11 +27,21 @@ const FaceDetection = ({ onDetected }) => {
 
   useEffect(() => {
     if (consentAccepted) {
-      loadModels().then(() => {
+      console.log('✅ Consent accepted, starting setup chain...');
+      // First start video, then load models, then start scanning
+      startVideo().then(() => {
+        console.log('✅ Video started successfully');
+        return loadModels();
+      }).then(() => {
+        console.log('✅ Models loaded successfully, ready to detect face');
+        alert('✅ AI Models โหลดเสร็จ! กำลังตรวจหาใบหน้า...');
         // Auto-start scan after models loaded
         setTimeout(() => {
+          console.log('🔍 Auto-starting face detection...');
           detectFace();
-        }, 1000);
+        }, 1500);
+      }).catch(error => {
+        console.error('❌ Error in setup chain:', error);
       });
     }
     return () => {
@@ -62,8 +72,6 @@ const FaceDetection = ({ onDetected }) => {
       await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
       console.log('✅ faceExpressionNet loaded');
       
-      console.log('🎥 Starting video...');
-      await startVideo();
       console.log('✅ Models loaded successfully');
       setIsLoading(false);
     } catch (error) {
@@ -77,21 +85,47 @@ const FaceDetection = ({ onDetected }) => {
   const startVideo = async () => {
     try {
       console.log('📹 Requesting camera access...');
+      alert('📹 ขออนุญาติใช้กล้อง...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
-          width: 640, 
-          height: 480,
+          width: { ideal: 640 },
+          height: { ideal: 480 },
           facingMode: 'user'
         } 
       });
+      alert('✅ กล้องเปิดสำเร็จ');
+      console.log('✅ Camera opened successfully');
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        console.log('✅ Camera started');
+        console.log('✅ Camera started, waiting for video to be ready...');
+        
+        // Wait for video to be ready
+        return new Promise((resolve, reject) => {
+          const checkReady = setInterval(() => {
+            if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+              console.log('✅ Video is ready to use');
+              clearInterval(checkReady);
+              resolve();
+            }
+          }, 100);
+          
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            clearInterval(checkReady);
+            if (videoRef.current && videoRef.current.readyState >= videoRef.current.HAVE_CURRENT_DATA) {
+              console.log('⚠️ Video stream available (partial ready)');
+              resolve();
+            } else {
+              reject(new Error('Video did not become ready in time'));
+            }
+          }, 5000);
+        });
       }
     } catch (error) {
       console.error('❌ Error accessing camera:', error);
       console.error('Camera error code:', error.name);
       alert(`📷 กรุณาอนุญาตให้เข้าถึงกล้อง:\n${error.message}`);
+      throw error;
     }
   };
 
@@ -116,9 +150,16 @@ const FaceDetection = ({ onDetected }) => {
     }
 
     // Check if video is actually loaded
-    if (videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
+    if (videoRef.current.readyState < videoRef.current.HAVE_CURRENT_DATA) {
       console.warn('⚠️ Video not ready, readyState:', videoRef.current.readyState);
       setScanStep('⏳ กำลังเตรียมกล้อง...');
+      setTimeout(() => detectFace(), 500);
+      return;
+    }
+
+    // Check if video has dimensions
+    if (!videoRef.current.videoWidth || !videoRef.current.videoHeight) {
+      console.warn('⚠️ Video dimensions not available');
       setTimeout(() => detectFace(), 500);
       return;
     }
@@ -129,6 +170,7 @@ const FaceDetection = ({ onDetected }) => {
 
     try {
       console.log('🔍 Starting face detection...');
+      console.log('📹 Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
       setScanStep('🔍 กำลังตรวจจับใบหน้า...');
       setScanProgress(20);
 
@@ -145,6 +187,15 @@ const FaceDetection = ({ onDetected }) => {
         console.log('⏳ No face detected, retrying...');
         setScanStep('⏳ ไม่พบใบหน้า กำลังลองใหม่...');
         setIsDetecting(false);
+        setAutoScanAttempts(prev => prev + 1);
+        
+        if (autoScanAttempts > 10) {
+          console.warn('⚠️ Max attempts reached, stopping auto-scan');
+          setScanStep('❌ ไม่สามารถตรวจจับใบหน้า กรุณากด "Start Scan" อีกครั้ง');
+          alert('⚠️ ไม่สามารถตรวจจับใบหน้าได้ กรุณามองหน้าเข้ากล้องและกดปุ่ม "Start Scan" อีกครั้ง');
+          return;
+        }
+        
         setTimeout(() => {
           detectFace();
         }, 1000);
@@ -152,6 +203,7 @@ const FaceDetection = ({ onDetected }) => {
       }
 
       console.log('✅ Face detected:', detections);
+      alert('✅ ตรวจจับใบหน้าสำเร็จ!');
       
       // Capture face image
       const video = videoRef.current;
@@ -171,11 +223,15 @@ const FaceDetection = ({ onDetected }) => {
       const gender = detections.gender;
       const expressions = detections.expressions;
 
+      console.log('👤 Detected:', { age, gender, expressions });
+
       setScanStep('✅ วิเคราะห์เสร็จสิ้น');
       setScanProgress(90);
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const interests = analyzeInterests(age, gender, expressions);
+      console.log('🎯 Interests:', interests);
+      
       const dominantEmotion = Object.keys(expressions).reduce((a, b) => 
         expressions[a] > expressions[b] ? a : b
       );
@@ -215,13 +271,15 @@ const FaceDetection = ({ onDetected }) => {
         setTimeout(() => {
           setShowResultStep(4);
           if (onDetected) {
+            console.log('📤 Sending detected interests to parent:', interests);
             onDetected(interests);
           }
         }, 8000);
       }
 
     } catch (error) {
-      console.error('Error detecting face:', error);
+      console.error('❌ Error detecting face:', error);
+      setScanStep('❌ เกิดข้อผิดพลาดในการสแกน');
     }
 
     setIsDetecting(false);
@@ -357,6 +415,8 @@ const FaceDetection = ({ onDetected }) => {
             <button 
               className="btn btn-accept"
               onClick={() => {
+                console.log('✅ User accepted consent, starting video and models...');
+                alert('✅ กำลังเปิดกล้อง และโหลด AI models...');
                 setConsentAccepted(true);
                 setShowConsent(false);
               }}

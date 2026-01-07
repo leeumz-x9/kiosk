@@ -1,0 +1,129 @@
+/* Loading Transition Component Styles */
+
+.loading-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0a4a2e 0%, #0d5f3a 25%, #16a34a 75%, #22c55e 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(0px);
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+/* Main loading circle with pulse effect */
+.loading-circle {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-dot {
+  width: 12px;
+  height: 12px;
+  background: #f4b844;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 20px rgba(244, 184, 68, 0.6);
+}
+
+/* Loading text animations */
+.loading-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.loading-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* Animated loading bars */
+.loading-bars {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  height: 40px;
+}
+
+.loading-bar {
+  width: 8px;
+  background: linear-gradient(180deg, #f4b844 0%, rgba(244, 184, 68, 0.5) 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(244, 184, 68, 0.4);
+}
+
+/* Loading progress text */
+.loading-progress {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* Gradient animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .loading-title {
+    font-size: 1.4rem;
+  }
+
+  .loading-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .loading-circle {
+    width: 100px;
+    height: 100px;
+  }
+}

@@ -1,8 +1,20 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import LoadingTransition from './LoadingTransition';
 import './WelcomeScreen.css';
 
 const WelcomeScreen = ({ onStart }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStartClick = async () => {
+    setIsLoading(true);
+    // Show loading for 2.5 seconds before transitioning to scan
+    setTimeout(() => {
+      setIsLoading(false);
+      onStart();
+    }, 2500);
+  };
+
   return (
     <motion.div 
       className="welcome-screen"
@@ -10,6 +22,11 @@ const WelcomeScreen = ({ onStart }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
+      {/* Loading Transition Effect */}
+      <AnimatePresence>
+        {isLoading && <LoadingTransition />}
+      </AnimatePresence>
+
       {/* Tech Frame */}
       <div className="welcome-frame">
         <div className="corner corner-tl"></div>
@@ -31,7 +48,8 @@ const WelcomeScreen = ({ onStart }) => {
 
           <motion.button
             className="start-btn"
-            onClick={onStart}
+            onClick={handleStartClick}
+            disabled={isLoading}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
