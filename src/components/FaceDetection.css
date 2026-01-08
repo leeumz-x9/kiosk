@@ -451,6 +451,140 @@
   }
 }
 
+/* Pi Camera Stream Container */
+.pi-camera-stream-container {
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12),
+              0 0 80px rgba(244, 184, 68, 0.3),
+              0 30px 90px rgba(0, 0, 0, 0.5);
+  animation: camera-active-pulse 3s ease-in-out infinite;
+  transition: all 0.5s ease;
+}
+
+/* เมื่อกำลัง detecting ลด opacity เพื่อให้เห็น animation */
+.pi-camera-stream-container.detecting {
+  box-shadow: 0 0 0 2px rgba(244, 184, 68, 0.6),
+              0 0 150px rgba(244, 184, 68, 0.8),
+              0 30px 90px rgba(0, 0, 0, 0.7);
+  animation: scanning-pulse 1.5s ease-in-out infinite;
+}
+
+.pi-camera-stream-container.detecting .pi-camera-stream {
+  opacity: 0.6;
+  filter: brightness(0.8) contrast(1.2);
+}
+
+@keyframes scanning-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(244, 184, 68, 0.6),
+                0 0 150px rgba(244, 184, 68, 0.8),
+                0 30px 90px rgba(0, 0, 0, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(244, 184, 68, 0.8),
+                0 0 200px rgba(244, 184, 68, 1),
+                0 40px 120px rgba(0, 0, 0, 0.8);
+    transform: scale(1.02);
+  }
+}
+
+.pi-camera-stream {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.1s ease, filter 0.3s ease;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.detection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes camera-active-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12),
+                0 0 80px rgba(22, 163, 74, 0.4),
+                0 30px 90px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2),
+                0 0 120px rgba(34, 197, 94, 0.6),
+                0 40px 110px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Placeholder for when camera is disconnected/loading */
+.pi-camera-placeholder {
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.1) 0%, rgba(244, 184, 68, 0.15) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12),
+              0 0 80px rgba(244, 184, 68, 0.3),
+              0 30px 90px rgba(0, 0, 0, 0.5);
+  animation: pi-camera-pulse 3s ease-in-out infinite;
+}
+
+.pi-camera-placeholder .camera-icon {
+  font-size: 120px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+  animation: icon-float 3s ease-in-out infinite;
+}
+
+.pi-camera-placeholder p {
+  font-size: 24px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.pi-camera-placeholder small {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 8px;
+}
+
+@keyframes pi-camera-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12),
+                0 0 80px rgba(244, 184, 68, 0.3),
+                0 30px 90px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2),
+                0 0 120px rgba(22, 163, 74, 0.5),
+                0 40px 110px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes icon-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
 .scan-circle {
   position: absolute;
   top: 50%;
@@ -459,7 +593,7 @@
   width: 510px;
   height: 510px;
   border-radius: 50%;
-  z-index: 2;
+  z-index: 3;  /* เพิ่ม z-index ให้อยู่เหนือภาพ */
   pointer-events: none;
 }
 
@@ -555,25 +689,27 @@
   }
 }
 
-/* Scanning Effects */
+/* Scanning Effects - ปรับแต่งให้เด่นชัดขึ้น */
 .scan-line {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  height: 3px;
+  height: 4px;  /* เพิ่มความหนา */
   background: linear-gradient(90deg, 
     transparent,
-    rgba(244, 184, 68, 0.3),
+    rgba(244, 184, 68, 0.4),
     rgba(244, 184, 68, 1),
-    rgba(244, 184, 68, 0.3),
+    rgba(244, 184, 68, 0.4),
     transparent
   );
-  box-shadow: 0 0 20px rgba(244, 184, 68, 0.8),
-              0 0 40px rgba(244, 184, 68, 0.6);
+  box-shadow: 0 0 30px rgba(244, 184, 68, 1),
+              0 0 60px rgba(244, 184, 68, 0.8),
+              0 0 90px rgba(244, 184, 68, 0.6);
   animation: scan-vertical 2s ease-in-out infinite;
-  filter: blur(1px);
+  filter: blur(0.5px);
+  z-index: 10;
 }
 
 @keyframes scan-vertical {
@@ -593,7 +729,7 @@
   }
 }
 
-/* Corner Brackets */
+/* Corner Brackets - ทำให้เด่นชัดขึ้น */
 .scan-corners {
   position: absolute;
   top: 50%;
@@ -602,57 +738,61 @@
   width: 90%;
   height: 90%;
   pointer-events: none;
+  z-index: 10;
 }
 
 .corner {
   position: absolute;
-  width: 50px;
-  height: 50px;
+  width: 60px;  /* เพิ่มขนาด */
+  height: 60px;
   border-style: solid;
-  border-color: rgba(244, 184, 68, 0.8);
-  animation: corner-pulse 3s ease-in-out infinite;
+  border-color: rgba(244, 184, 68, 1);  /* เข้มขึ้น */
+  animation: corner-pulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(244, 184, 68, 0.8));
 }
 
 .corner-tl {
   top: 0;
   left: 0;
-  border-width: 2.5px 0 0 2.5px;
+  border-width: 3px 0 0 3px;  /* หนาขึ้น */
   border-radius: 50% 0 0 0;
 }
 
 .corner-tr {
   top: 0;
   right: 0;
-  border-width: 2.5px 2.5px 0 0;
+  border-width: 3px 3px 0 0;
   border-radius: 0 50% 0 0;
 }
 
 .corner-bl {
   bottom: 0;
   left: 0;
-  border-width: 0 0 2.5px 2.5px;
+  border-width: 0 0 3px 3px;
   border-radius: 0 0 0 50%;
 }
 
 .corner-br {
   bottom: 0;
   right: 0;
-  border-width: 0 2.5px 2.5px 0;
+  border-width: 0 3px 3px 0;
   border-radius: 0 0 50% 0;
 }
 
 @keyframes corner-pulse {
   0%, 100% {
-    opacity: 0.4;
-    box-shadow: 0 0 8px rgba(244, 184, 68, 0.4);
+    opacity: 0.6;
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(244, 184, 68, 0.6);
   }
   50% {
-    opacity: 0.8;
-    box-shadow: 0 0 18px rgba(244, 184, 68, 0.7);
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(244, 184, 68, 1);
   }
 }
 
-/* Scanning Grid */
+/* Scanning Grid - เข้มขึ้น */
 .scan-grid {
   position: absolute;
   top: 50%;
@@ -661,26 +801,27 @@
   width: 100%;
   height: 100%;
   background-image: 
-    linear-gradient(0deg, rgba(244, 184, 68, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(244, 184, 68, 0.1) 1px, transparent 1px);
-  background-size: 30px 30px;
+    linear-gradient(0deg, rgba(244, 184, 68, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 184, 68, 0.2) 1px, transparent 1px);
+  background-size: 25px 25px;
   border-radius: 50%;
   opacity: 0;
-  animation: grid-fade 3s ease-in-out infinite;
+  animation: grid-fade 2.5s ease-in-out infinite;
+  z-index: 5;
 }
 
 @keyframes grid-fade {
   0%, 100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(0.95);
   }
   50% {
-    opacity: 0.3;
+    opacity: 0.5;
     transform: translate(-50%, -50%) scale(1.05);
   }
 }
 
-/* Scanning Particles */
+/* Scanning Particles - เพิ่มขนาดและความสว่าง */
 .scan-particles {
   position: absolute;
   top: 50%;
@@ -689,37 +830,40 @@
   height: 100%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  z-index: 8;
 }
 
 .particle {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle, rgba(244, 184, 68, 1), transparent);
+  width: 6px;  /* เพิ่มขนาด */
+  height: 6px;
+  background: radial-gradient(circle, rgba(244, 184, 68, 1), rgba(244, 184, 68, 0.3) 70%, transparent);
   border-radius: 50%;
-  animation: particle-orbit 4s linear infinite;
+  animation: particle-orbit 3.5s linear infinite;
   animation-delay: var(--delay);
   transform-origin: 0 0;
-  box-shadow: 0 0 10px rgba(244, 184, 68, 0.8);
+  box-shadow: 0 0 15px rgba(244, 184, 68, 1),
+              0 0 25px rgba(244, 184, 68, 0.6);
+  filter: blur(0.5px);
 }
 
 @keyframes particle-orbit {
   0% {
-    transform: rotate(var(--angle)) translateX(280px) scale(0);
+    transform: rotate(var(--angle)) translateX(260px) scale(0);
     opacity: 0;
   }
   10% {
     opacity: 1;
-    transform: rotate(var(--angle)) translateX(280px) scale(1);
+    transform: rotate(var(--angle)) translateX(260px) scale(1.2);
   }
   90% {
     opacity: 1;
-    transform: rotate(calc(var(--angle) + 360deg)) translateX(280px) scale(1);
+    transform: rotate(calc(var(--angle) + 360deg)) translateX(260px) scale(1.2);
   }
   100% {
-    transform: rotate(calc(var(--angle) + 360deg)) translateX(280px) scale(0);
+    transform: rotate(calc(var(--angle) + 360deg)) translateX(260px) scale(0);
     opacity: 0;
   }
 }
@@ -901,9 +1045,9 @@
 
 .info-row {
   display: flex;
-  gap: 0.9rem;
+  gap: 1rem;
   align-items: center;
-  padding: 0.8rem 1.1rem;
+  padding: 1rem 1.3rem;
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(13, 95, 58, 0.03), rgba(34, 197, 94, 0.05));
   border: 1px solid rgba(13, 95, 58, 0.08);
@@ -934,18 +1078,43 @@
   transform: translateX(0);
 }
 
+.info-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  min-width: 40px;
+  text-align: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
 .info-label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #6b7280;
   font-weight: 600;
-  min-width: 60px;
+  min-width: 70px;
   letter-spacing: 0.5px;
 }
 
 .info-value {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: #1f2937;
   font-weight: 700;
+  flex: 1;
+}
+
+/* Specific info row styles */
+.info-age {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.1));
+  border-left: 4px solid #3b82f6;
+}
+
+.info-gender {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(236, 72, 153, 0.1));
+  border-left: 4px solid #ec4899;
+}
+
+.info-mood {
+  background: linear-gradient(135deg, rgba(244, 184, 68, 0.05), rgba(244, 184, 68, 0.1));
+  border-left: 4px solid #f4b844;
 }
 
 /* Interests Section - Ultra Clean */

@@ -1,10 +1,11 @@
 """
-Raspberry Pi 5 IoT Server for LED Strip Control
+Raspberry Pi 5 IoT Server for LED Strip Control + Face Analysis
 This server runs on Pi5 and controls LED strip based on user presence
 Communicates with Firebase Realtime Database
+Includes face detection with age, gender, and emotion analysis
 """
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 import RPi.GPIO as GPIO
 import time
@@ -12,6 +13,10 @@ import threading
 import firebase_admin
 from firebase_admin import credentials, db
 import json
+import cv2
+import numpy as np
+from picamera2 import Picamera2
+from face_analysis import get_face_analyzer
 
 app = Flask(__name__)
 CORS(app)
@@ -34,6 +39,9 @@ led_pwm.start(0)  # Start with LED off
 # Global state
 led_status = False
 user_present = False
+camera = None
+camera_initialized = False
+face_analyzer = None
 
 # Initialize Firebase Admin
 try:
@@ -191,6 +199,213 @@ def get_distance():
         'unit': 'cm',
         'timestamp': int(time.time() * 1000)
     })
+
+
+# ========== Camera and Face Analysis Endpoints ==========
+
+def init_camera():
+    """Initialize Pi Camera"""
+    global camera, camera_initialized, face_analyzer
+    
+    try:
+        if camera_initialized:
+            return True
+        
+        print("📷 Initializing Pi Camera...")
+        camera = Picamera2()
+        
+        # Configure camera for face detection
+        config = camera.create_still_configuration(
+            main={"size": (640, 480)},
+            lores={"size": (320, 240)},
+            display="lores"
+        )
+        camera.configure(config)
+        camera.start()
+        
+        # Wait for camera to warm up
+        time.sleep(2)
+        
+        # Initialize face analyzer
+        face_analyzer = get_face_analyzer()
+        
+        camera_initialized = True
+        print("✅ Pi Camera initialized successfully")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Camera initialization error: {e}")
+        camera_initialized = False
+        return False
+
+
+@app.route('/api/camera/status')
+def camera_status():
+    """Get camera status"""
+    return jsonify({
+        'initialized': camera_initialized,
+        'available': camera is not None,
+        'timestamp': int(time.time() * 1000)
+    })
+
+
+@app.route('/api/camera/init', methods=['POST'])
+def initialize_camera():
+    """Initialize camera endpoint"""
+    success = init_camera()
+    return jsonify({
+        'success': success,
+        'initialized': camera_initialized,
+        'message': 'Camera initialized' if success else 'Camera initialization failed'
+    })
+
+
+@app.route('/api/face/detect')
+def detect_face():
+    """
+    Detect faces and analyze age, gender, emotion
+    Returns JSON with face analysis results
+    """
+    global camera, camera_initialized, face_analyzer
+    
+    if not camera_initialized:
+        init_camera()
+    
+    if not camera_initialized:
+        return jsonify({
+            'success': False,
+            'error': 'Camera not initialized'
+        }), 500
+    
+    try:
+        # Capture frame
+        frame = camera.capture_array()
+        
+        # Convert RGB to BGR for OpenCV
+        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        
+        # Analyze face
+        analysis = face_analyzer.analyze_frame_with_detection(frame_bgr)
+        
+        if not analysis.get('success'):
+            return jsonify(analysis), 200
+        
+        # Return analysis results
+        return jsonify({
+            'success': True,
+            'faces_detected': analysis.get('faces_detected', 0),
+            'is_human': analysis.get('is_human', False),
+            'age': analysis.get('age'),
+            'gender': analysis.get('gender'),
+            'emotion': analysis.get('emotion'),
+            'dominant_emotion': analysis.get('dominant_emotion'),
+            'all_emotions': analysis.get('all_emotions', {}),
+            'confidence': analysis.get('confidence', {}),
+            'face_regions': analysis.get('face_regions', []),
+            'timestamp': int(time.time() * 1000)
+        })
+        
+    except Exception as e:
+        print(f"❌ Face detection error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/face/stream')
+def face_stream():
+    """
+    Stream video with face detection overlay
+    Returns MJPEG stream
+    """
+    def generate():
+        global camera, camera_initialized, face_analyzer
+        
+        if not camera_initialized:
+            init_camera()
+        
+        while camera_initialized:
+            try:
+                # Capture frame
+                frame = camera.capture_array()
+                
+                # Convert RGB to BGR for OpenCV
+                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                
+                # Analyze and draw on frame
+                analysis = face_analyzer.analyze_frame_with_detection(frame_bgr)
+                
+                if analysis.get('success'):
+                    frame_bgr = face_analyzer.draw_analysis_on_frame(frame_bgr, analysis)
+                
+                # Encode frame to JPEG
+                ret, buffer = cv2.imencode('.jpg', frame_bgr)
+                frame_bytes = buffer.tobytes()
+                
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+                
+                time.sleep(0.1)  # 10 FPS
+                
+            except Exception as e:
+                print(f"❌ Stream error: {e}")
+                break
+    
+    return Response(generate(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/api/face/analyze', methods=['POST'])
+def analyze_uploaded_face():
+    """
+    Analyze face from uploaded image
+    Expects multipart/form-data with 'image' field
+    """
+    try:
+        if 'image' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No image provided'
+            }), 400
+        
+        file = request.files['image']
+        
+        # Read image
+        image_bytes = file.read()
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Initialize face analyzer if needed
+        global face_analyzer
+        if face_analyzer is None:
+            face_analyzer = get_face_analyzer()
+        
+        # Analyze face
+        analysis = face_analyzer.analyze_frame_with_detection(frame)
+        
+        if not analysis.get('success'):
+            return jsonify(analysis), 200
+        
+        return jsonify({
+            'success': True,
+            'faces_detected': analysis.get('faces_detected', 0),
+            'is_human': analysis.get('is_human', False),
+            'age': analysis.get('age'),
+            'gender': analysis.get('gender'),
+            'emotion': analysis.get('emotion'),
+            'dominant_emotion': analysis.get('dominant_emotion'),
+            'all_emotions': analysis.get('all_emotions', {}),
+            'confidence': analysis.get('confidence', {}),
+            'timestamp': int(time.time() * 1000)
+        })
+        
+    except Exception as e:
+        print(f"❌ Image analysis error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 def cleanup():

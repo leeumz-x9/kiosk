@@ -2,9 +2,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as faceapi from 'face-api.js';
 import { motion } from 'framer-motion';
 import ScanFrame from './ScanFrame';
-import { CAREER_CATEGORIES } from '../config';
-import { recordHeatmapClick } from '../firebase';
+import { CAREER_CATEGORIES, PI5_CONFIG } from '../config';
+import { recordHeatmapClick, saveSession } from '../firebase';
 import { logConversionStep } from '../firebaseService';
+import voiceService from '../voiceService';
 import './FaceDetection.css';
 
 const FaceDetection = ({ onDetected }) => {
@@ -23,26 +24,54 @@ const FaceDetection = ({ onDetected }) => {
   const [detectedEmotion, setDetectedEmotion] = useState(null);
   const [showParentalConsent, setShowParentalConsent] = useState(false);
   const [parentalConsentAccepted, setParentalConsentAccepted] = useState(false);
+  const [piCameraStreamUrl, setPiCameraStreamUrl] = useState(null);
+  const [cameraError, setCameraError] = useState(false);
+  const [snapshotRefreshKey, setSnapshotRefreshKey] = useState(0);
   const autoScanIntervalRef = useRef(null);
+  const piStreamRef = useRef(null);
+  const snapshotIntervalRef = useRef(null);
 
   useEffect(() => {
     if (consentAccepted) {
       console.log('✅ Consent accepted, starting setup chain...');
-      // First start video, then load models, then start scanning
-      startVideo().then(() => {
-        console.log('✅ Video started successfully');
-        return loadModels();
-      }).then(() => {
-        console.log('✅ Models loaded successfully, ready to detect face');
-        alert('✅ AI Models โหลดเสร็จ! กำลังตรวจหาใบหน้า...');
-        // Auto-start scan after models loaded
+      
+      // Initialize voice service
+      voiceService.init();
+      
+      // Check if using Pi Camera
+      if (PI5_CONFIG.usePiCamera) {
+        console.log('📷 Using Pi5 Camera IMX500');
+        // Use snapshot endpoint with faster refresh for smooth display
+        const updateSnapshot = () => {
+          setSnapshotRefreshKey(prev => prev + 1);
+        };
+        
+        // Update snapshot every 200ms (5 FPS - smooth and responsive)
+        snapshotIntervalRef.current = setInterval(updateSnapshot, 200);
+        
+        setIsLoading(false);
+        voiceService.speak('สวัสดีค่ะ กำลังเชื่อมต่อกล้อง Pi');
         setTimeout(() => {
-          console.log('🔍 Auto-starting face detection...');
+          console.log('🔍 Auto-starting Pi face detection...');
           detectFace();
-        }, 1500);
-      }).catch(error => {
-        console.error('❌ Error in setup chain:', error);
-      });
+        }, 1000);
+      } else {
+        // Use web camera
+        console.log('📹 Using Web Camera');
+        startVideo().then(() => {
+          console.log('✅ Video started successfully');
+          return loadModels();
+        }).then(() => {
+          console.log('✅ Models loaded successfully, ready to detect face');
+          alert('✅ AI Models โหลดเสร็จ! กำลังตรวจหาใบหน้า...');
+          setTimeout(() => {
+            console.log('🔍 Auto-starting face detection...');
+            detectFace();
+          }, 1500);
+        }).catch(error => {
+          console.error('❌ Error in setup chain:', error);
+        });
+      }
     }
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
@@ -51,8 +80,159 @@ const FaceDetection = ({ onDetected }) => {
       if (autoScanIntervalRef.current) {
         clearInterval(autoScanIntervalRef.current);
       }
+      if (snapshotIntervalRef.current) {
+        clearInterval(snapshotIntervalRef.current);
+      }
     };
   }, [consentAccepted]);
+
+  const detectFaceWithPiCamera = async () => {
+    setIsDetecting(true);
+    setScanProgress(0);
+    setScanStep('Initializing...');
+    voiceService.speak('กำลังเตรียมตรวจสอบใบหน้าค่ะ');
+
+    try {
+      // Step 1: Connecting (smooth progress 0-30%)
+      setScanStep('📷 Connecting to Camera...');
+      for (let i = 0; i <= 30; i += 2) {
+        setScanProgress(i);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+
+      const response = await fetch(`${PI5_CONFIG.endpoint}/api/face/detect`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Pi5 Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('📥 Pi5 Response:', data);
+
+      if (!data.success || !data.face_detected) {
+        console.log('⏳ No face detected, retrying...');
+        setScanStep('⏳ No face detected, please look at camera...');
+        setIsDetecting(false);
+        setAutoScanAttempts(prev => prev + 1);
+        
+        if (autoScanAttempts > 10) {
+          setScanStep('❌ Cannot detect face, please try again');
+          voiceService.speak('ไม่สามารถตรวจจับใบหน้าได้ กรุณาลองใหม่อีกครั้งค่ะ');
+          return;
+        }
+        
+        setTimeout(() => detectFace(), 800);
+        return;
+      }
+
+      // Step 2: Face Detected! (30-60%)
+      console.log('✅ Face detected!');
+      voiceService.speak('ตรวจพบใบหน้าแล้วค่ะ');
+      setScanStep('✅ Face Detected!');
+      for (let i = 30; i <= 60; i += 3) {
+        setScanProgress(i);
+        await new Promise(resolve => setTimeout(resolve, 15));
+      }
+
+      // Use data from Pi camera
+      const age = data.age || 20;
+      const gender = data.gender || 'unknown';
+      const emotion = data.emotion || 'happy';
+      
+      // Create expressions object
+      const expressions = {
+        neutral: 0.1,
+        happy: 0.1,
+        sad: 0.1,
+        angry: 0.1,
+        fearful: 0.1,
+        disgusted: 0.1,
+        surprised: 0.1
+      };
+      expressions[emotion] = 0.9;
+
+      if (data.image) {
+        setCapturedImage(data.image);
+      }
+
+      // Step 3: Analyzing (60-90%)
+      setScanStep('📊 Analyzing Profile...');
+      voiceService.speak('กำลังวิเคราะห์ข้อมูลค่ะ');
+      for (let i = 60; i <= 90; i += 2) {
+        setScanProgress(i);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+      
+      const interests = analyzeInterests(age, gender, expressions);
+      setDetectedEmotion(emotion);
+
+      // Step 4: Complete! (90-100%)
+      setScanStep('✨ Analysis Complete!');
+      voiceService.speak('วิเคราะห์เสร็จสมบูรณ์ค่ะ');
+      for (let i = 90; i <= 100; i += 2) {
+        setScanProgress(i);
+        await new Promise(resolve => setTimeout(resolve, 15));
+      }
+      
+      const detectedData = {
+        age,
+        gender,
+        expressions,
+        interests,
+        emotion,
+        source: 'pi5_camera',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Save to Firebase
+      const sessionId = sessionStorage.getItem('sessionId') || `pi5_${Date.now()}`;
+      sessionStorage.setItem('sessionId', sessionId);
+      
+      await saveSession({
+        sessionId,
+        type: 'face_scan_pi5',
+        demographics: { age, gender, emotion },
+        interests,
+        device: 'pi5_imx500',
+        scanData: data
+      });
+      
+      await logConversionStep('scanned', sessionId, {
+        age, gender, emotion, source: 'pi5_camera'
+      });
+      
+      setDetectedInfo(detectedData);
+      recordHeatmapClick(0, 0, 'face-scan');
+
+      // Show results with smooth animation
+      if (age < 13) {
+        setShowParentalConsent(true);
+        setShowResultStep(0);
+      } else {
+        setTimeout(() => setShowResultStep(1), 500);
+        setTimeout(() => setShowResultStep(2), 1500);
+        setTimeout(() => setShowResultStep(3), 2500);
+        setTimeout(() => {
+          setShowResultStep(4);
+          if (onDetected) {
+            onDetected(interests);
+          }
+        }, 3500);
+      }
+
+    } catch (error) {
+      console.error('❌ Error:', error);
+      setScanStep('❌ Connection Failed');
+      voiceService.speak('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งค่ะ');
+    }
+
+    setIsDetecting(false);
+  };
 
   const loadModels = async () => {
     try {
@@ -144,12 +324,25 @@ const FaceDetection = ({ onDetected }) => {
   };
 
   const detectFace = async () => {
-    if (isDetecting || !videoRef.current) {
-      console.warn('⚠️ detectFace: isDetecting=' + isDetecting + ', videoRef=' + (videoRef.current ? 'ready' : 'null'));
+    // For Pi Camera, skip video ref check
+    if (isDetecting) {
+      console.warn('⚠️ detectFace already in progress');
+      return;
+    }
+    
+    // For web camera, check video ref
+    if (!PI5_CONFIG.usePiCamera && !videoRef.current) {
+      console.warn('⚠️ detectFace: videoRef not ready');
       return;
     }
 
-    // Check if video is actually loaded
+    // Use Pi Camera API if configured
+    if (PI5_CONFIG.usePiCamera) {
+      await detectFaceWithPiCamera();
+      return;
+    }
+
+    // Check if video is actually loaded (web camera only)
     if (videoRef.current.readyState < videoRef.current.HAVE_CURRENT_DATA) {
       console.warn('⚠️ Video not ready, readyState:', videoRef.current.readyState);
       setScanStep('⏳ กำลังเตรียมกล้อง...');
@@ -203,7 +396,7 @@ const FaceDetection = ({ onDetected }) => {
       }
 
       console.log('✅ Face detected:', detections);
-      alert('✅ ตรวจจับใบหน้าสำเร็จ!');
+      voiceService.speak('ตรวจจับใบหน้าสำเร็จค่ะ กำลังวิเคราะห์');
       
       // Capture face image
       const video = videoRef.current;
@@ -239,6 +432,7 @@ const FaceDetection = ({ onDetected }) => {
 
       setScanProgress(100);
       setScanStep('✅ เสร็จสมบูรณ์');
+      voiceService.speak('วิเคราะห์เสร็จสมบูรณ์ค่ะ');
       await new Promise(resolve => setTimeout(resolve, 400));
       
       // Store detected info
@@ -247,14 +441,32 @@ const FaceDetection = ({ onDetected }) => {
         gender,
         expressions,
         interests,
-        emotion: dominantEmotion
+        emotion: dominantEmotion,
+        source: 'web_camera',
+        timestamp: new Date().toISOString()
       };
       
       // Log conversion step: scanned
-      await logConversionStep('scanned', sessionStorage.getItem('sessionId') || 'temp-session', {
+      const sessionId = sessionStorage.getItem('sessionId') || `web_${Date.now()}`;
+      sessionStorage.setItem('sessionId', sessionId);
+      
+      await saveSession({
+        sessionId,
+        type: 'face_scan_web',
+        demographics: {
+          age,
+          gender,
+          emotion: dominantEmotion
+        },
+        interests,
+        device: 'web_camera'
+      });
+      
+      await logConversionStep('scanned', sessionId, {
         age,
         gender,
-        emotion: dominantEmotion
+        emotion: dominantEmotion,
+        source: 'web_camera'
       });
       
       setDetectedInfo(detectedData);
@@ -528,13 +740,43 @@ const FaceDetection = ({ onDetected }) => {
 
           <div className="video-scanner">
             <div className="scanner-frame">
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                playsInline
-                className="scanner-video"
-              />
+              {!PI5_CONFIG.usePiCamera && (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="scanner-video"
+                />
+              )}
+              {PI5_CONFIG.usePiCamera && (
+                <div className={`pi-camera-stream-container ${isDetecting ? 'detecting' : ''}`}>
+                  <img
+                    ref={piStreamRef}
+                    src={`${PI5_CONFIG.endpoint}/api/camera/snapshot?t=${snapshotRefreshKey}`}
+                    alt="Pi Camera Live View"
+                    className="pi-camera-stream"
+                    onError={() => {
+                      console.error('❌ Failed to load Pi camera snapshot');
+                      setCameraError(true);
+                    }}
+                    onLoad={() => {
+                      setCameraError(false);
+                    }}
+                  />
+                  {cameraError && (
+                    <div className="pi-camera-placeholder">
+                      <div className="camera-icon">📷</div>
+                      <p>Camera Disconnected</p>
+                      <small>IMX500 AI Camera</small>
+                    </div>
+                  )}
+                  <canvas
+                    ref={canvasRef}
+                    className="detection-overlay"
+                  />
+                </div>
+              )}
               <div className="scan-circle">
                 {isDetecting && (
                   <>

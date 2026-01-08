@@ -25,18 +25,24 @@ class VoiceService {
       return false;
     }
 
-    // Wait for ResponsiveVoice to be ready
-    responsiveVoice.init();
+    // DON'T call responsiveVoice.init() - will be called on first user interaction
+    // Set silent mode to prevent any automatic audio
+    if (responsiveVoice.hasOwnProperty('clickEvent')) {
+      responsiveVoice.clickEvent = false;
+    }
     
-    // Disable welcome message if function exists
+    // Disable welcome message and timeout
     if (typeof responsiveVoice.enableEstimationTimeout !== 'undefined') {
       responsiveVoice.enableEstimationTimeout = false;
     }
+    if (typeof responsiveVoice.enableWindowClickHook !== 'undefined') {
+      responsiveVoice.enableWindowClickHook = false;
+    }
     
     this.initialized = true;
-    console.log('✅ ResponsiveVoice initialized');
+    console.log('✅ VoiceService ready (silent mode - waiting for user interaction)');
     
-    // Setup user interaction listener to unlock audio
+    // Setup user interaction listener
     this.setupInteractionListener();
     
     return true;
@@ -49,10 +55,14 @@ class VoiceService {
     const unlockAudio = () => {
       if (!this.userInteracted) {
         this.userInteracted = true;
-        console.log('✅ Audio unlocked by user interaction');
         
-        // DON'T play empty text - just mark as unlocked
-        console.log('🔓 Audio context ready');
+        // NOW initialize ResponsiveVoice after user interaction
+        if (typeof responsiveVoice !== 'undefined') {
+          responsiveVoice.init();
+          console.log('✅ ResponsiveVoice initialized after user interaction');
+        }
+        
+        console.log('✅ Audio unlocked - Voice feedback enabled');
         
         // Remove listeners after first interaction
         document.removeEventListener('click', unlockAudio);
@@ -62,9 +72,9 @@ class VoiceService {
     };
 
     // Listen for first user interaction
-    document.addEventListener('click', unlockAudio);
-    document.addEventListener('touchstart', unlockAudio);
-    document.addEventListener('keydown', unlockAudio);
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('touchstart', unlockAudio, { once: true });
+    document.addEventListener('keydown', unlockAudio, { once: true });
   }
 
   /**
@@ -104,19 +114,16 @@ class VoiceService {
    */
   speak(text, language = null) {
     if (!this.isEnabled || !this.initialized) {
-      console.warn('Voice service not enabled or initialized');
       return Promise.resolve();
     }
 
     // Check if text is empty or invalid
     if (!text || typeof text !== 'string' || text.trim() === '') {
-      console.warn('⚠️ Cannot speak: Text is empty or invalid');
       return Promise.resolve();
     }
 
-    // Check if user has interacted first
+    // Check if user has interacted first (silently skip if not)
     if (!this.userInteracted) {
-      console.warn('⚠️ Cannot play audio: User has not interacted with the page yet');
       return Promise.resolve();
     }
 

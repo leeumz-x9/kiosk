@@ -1,0 +1,91 @@
+╔═══════════════════════════════════════════════════════╗
+║  ✅ Pi5 Kiosk System - READY TO USE                  ║
+╚═══════════════════════════════════════════════════════╝
+
+🎯 สิ่งที่ทำงานแล้ว:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Pi5 Camera IMX500 (AI Camera) - Face Detection
+✅ ResponsiveVoice TTS - เสียงพูดภาษาไทย
+✅ Firebase Integration - บันทึกข้อมูล face scan
+✅ Web Interface - React + Vite
+✅ Age/Gender/Emotion Detection
+
+📋 การรันระบบ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+วิธีที่ 1: รันด้วย Script
+-------------------------
+cd "/home/admin/Desktop/kiosk promax/kiosk"
+./START_ALL.sh
+
+วิธีที่ 2: รัน Manual
+--------------------
+# Terminal 1 - Pi5 Server
+cd "/home/admin/Desktop/kiosk promax/kiosk/pi5_server"
+python3 app_imx500.py
+
+# Terminal 2 - Web Server
+cd "/home/admin/Desktop/kiosk promax/kiosk"
+npm run dev
+
+🌐 เข้าใช้งาน:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Web App:     http://localhost:3000
+• Pi5 API:     http://localhost:5000
+• Network:     http://172.20.10.2:3000
+
+🔥 Firebase Setup (ถ้าต้องการ):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ดูคู่มือใน: FIREBASE_SETUP.md
+
+หรือตั้งค่าเร็วๆ:
+1. ไปที่ https://console.firebase.google.com
+2. สร้าง project ใหม่
+3. คัดลอก config มาใส่ใน src/config.js
+4. เปิด Firestore + Realtime Database
+
+⚠️ หมายเหตุ:
+• ถ้าไม่ตั้ง Firebase = ระบบทำงานปกติ แต่ไม่เก็บข้อมูล
+• ResponsiveVoice ต้อง user คลิก consent ก่อนถึงจะพูดได้
+• Pi5 Camera ต้องเชื่อมต่ออยู่ที่ http://172.20.10.2:5000
+
+📊 ข้อมูลที่บันทึกลง Firebase:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• sessions     - ข้อมูลการ scan แต่ละครั้ง
+• conversions  - ขั้นตอนการใช้งาน
+• heatmap      - ตำแหน่งที่คลิก
+
+🔧 Config สำคัญ (src/config.js):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PI5_CONFIG.usePiCamera = true     // ใช้ Pi Camera
+VOICE_CONFIG.enabled = true        // เปิด TTS
+firebaseConfig.projectId = ?       // ตั้งค่า Firebase
+
+🎤 ResponsiveVoice:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• พูดเมื่อ: เริ่มสแกน, สแกนสำเร็จ, วิเคราะห์เสร็จ
+• ภาษา: ไทย (Thai Female)
+• Pitch: 1.2 (สูง วัยรุ่น)
+• Rate: 1.1 (เร็วนิด สดใส)
+
+🛑 หยุดระบบ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pkill -f app_imx500.py
+pkill -f vite
+
+📝 Log Files:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/tmp/pi5_server.log    - Pi5 Camera logs
+/tmp/vite_server.log   - Web Server logs
+
+🎯 Testing:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Test Pi5 API
+curl http://localhost:5000/api/status
+
+# Test Face Detection
+curl http://localhost:5000/api/face/detect
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 ระบบพร้อมใช้งาน!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

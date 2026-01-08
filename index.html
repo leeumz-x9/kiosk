@@ -10,8 +10,18 @@
   <link rel="stylesheet" href="/src/styles.css">
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   
-  <!-- ResponsiveVoice API - รองรับ 3 ภาษา (ไทย, อังกฤษ, จีน) -->
-  <script src="https://code.responsivevoice.org/responsivevoice.js?key=KmoDEFR2"></script>
+  <!-- ResponsiveVoice API - โหลดแบบ defer เพื่อป้องกัน autoplay error -->
+  <script>
+    // Suppress ResponsiveVoice autoplay errors before library loads
+    window.addEventListener('unhandledrejection', function(event) {
+      const error = event.reason?.toString() || '';
+      if (error.includes('NotAllowedError') || error.includes('play() failed')) {
+        event.preventDefault();
+        console.log('🔇 Audio autoplay blocked (waiting for user interaction)');
+      }
+    });
+  </script>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=KmoDEFR2" defer></script>
 </head>
 <body>
   <div id="root"></div>

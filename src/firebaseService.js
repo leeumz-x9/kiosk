@@ -17,51 +17,60 @@ import {
   updateDoc,
   onSnapshot
 } from 'firebase/firestore';
+import { firebaseConfig } from './config';
 
-// ===== CAREERS =====
-export const getCareers = async () => {
+// Check if Firebase is properly configured
+const isFirebaseConfigured = firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
+
+// Helper to safely execute Firebase operations
+const safeFirebaseOperation = async (operation, fallbackValue = null) => {
+  if (!isFirebaseConfigured || !db) {
+    // เงียบๆ skip ไม่ต้อง log ทุกครั้ง
+    return fallbackValue;
+  }
   try {
-    const careersRef = collection(db, 'careers');
-    const snapshot = await getDocs(careersRef);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return await operation();
   } catch (error) {
-    console.error('Error fetching careers:', error);
-    return [];
+    console.error('Firebase operation error:', error);
+    return fallbackValue;
   }
 };
 
+// ===== CAREERS =====
+export const getCareers = async () => {
+  return safeFirebaseOperation(async () => {
+    const careersRef = collection(db, 'careers');
+    const snapshot = await getDocs(careersRef);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }, []);
+};
+
 export const getCareerById = async (careerId) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const careerRef = doc(db, 'careers', careerId);
     const snapshot = await getDoc(careerRef);
     if (snapshot.exists()) {
       return { id: snapshot.id, ...snapshot.data() };
     }
     return null;
-  } catch (error) {
-    console.error('Error fetching career:', error);
-    return null;
-  }
+  });
 };
 
 // ===== TUITION =====
 export const getTuitionInfo = async () => {
-  try {
+  return safeFirebaseOperation(async () => {
     const tuitionRef = doc(db, 'tuition', 'data');
     const snapshot = await getDoc(tuitionRef);
     if (snapshot.exists()) {
       return snapshot.data();
     }
     return null;
-  } catch (error) {
-    console.error('Error fetching tuition:', error);
-    return null;
-  }
+  });
 };
 
 // ===== HEATMAP =====
 export const logHeatmapClick = async (x, y, page = 'unknown') => {
-  try {
+  return safeFirebaseOperation(async () => {
     const heatmapRef = collection(db, 'heatmap');
     await addDoc(heatmapRef, {
       x,
@@ -70,24 +79,22 @@ export const logHeatmapClick = async (x, y, page = 'unknown') => {
       timestamp: new Date()
     });
     console.log(`✅ Logged heatmap click at (${x}, ${y})`);
-  } catch (error) {
-    console.error('Error logging heatmap click:', error);
-  }
+  });
 };
 
 export const getHeatmapData = async (limitCount = 100) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const heatmapRef = collection(db, 'heatmap');
     const q = query(heatmapRef, orderBy('timestamp', 'desc'), limit(limitCount));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => doc.data());
-  } catch (error) {
-    console.error('Error fetching heatmap:', error);
-    return [];
-  }
+  }, []);
 };
 
 export const subscribeToHeatmap = (callback) => {
+  if (!isFirebaseConfigured || !db) {
+    return () => {};  // เงียบๆ skip
+  }
   try {
     const heatmapRef = collection(db, 'heatmap');
     const q = query(heatmapRef, orderBy('timestamp', 'desc'), limit(100));
@@ -106,7 +113,7 @@ export const subscribeToHeatmap = (callback) => {
 
 // ===== SESSIONS (User Activity) =====
 export const createSession = async (sessionData) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const sessionsRef = collection(db, 'sessions');
     const docRef = await addDoc(sessionsRef, {
       ...sessionData,
@@ -114,14 +121,11 @@ export const createSession = async (sessionData) => {
       startTime: new Date()
     });
     return docRef.id;
-  } catch (error) {
-    console.error('Error creating session:', error);
-    return null;
-  }
+  });
 };
 
 export const logSessionActivity = async (sessionId, activity) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const sessionsRef = collection(db, 'sessions');
     await addDoc(sessionsRef, {
       sessionId,
@@ -129,80 +133,63 @@ export const logSessionActivity = async (sessionId, activity) => {
       timestamp: new Date()
     });
     return true;
-  } catch (error) {
-    console.error('Error logging activity:', error);
-    return false;
-  }
+  });
 };
 
 export const getRecentSessions = async (limitCount = 50) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const sessionsRef = collection(db, 'sessions');
     const q = query(sessionsRef, orderBy('createdAt', 'desc'), limit(limitCount));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error('Error fetching sessions:', error);
-    return [];
-  }
+  }, []);
 };
 
 // ===== ANALYTICS =====
 export const getAnalyticsSummary = async () => {
-  try {
+  return safeFirebaseOperation(async () => {
     const analyticsRef = collection(db, 'analytics');
     const snapshot = await getDocs(analyticsRef);
     if (snapshot.docs.length > 0) {
       return snapshot.docs[0].data();
     }
     return null;
-  } catch (error) {
-    console.error('Error fetching analytics:', error);
-    return null;
-  }
+  });
 };
 
 export const updateAnalytics = async (updates) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const analyticsRef = doc(db, 'analytics', 'summary');
     await updateDoc(analyticsRef, {
       ...updates,
       lastUpdated: new Date()
     });
     console.log('✅ Analytics updated');
-  } catch (error) {
-    console.error('Error updating analytics:', error);
-  }
+  });
 };
 
 // ===== IoT / LED =====
 export const getLEDStatus = async () => {
-  try {
+  return safeFirebaseOperation(async () => {
     const ledRef = doc(db, 'led_status', 'current');
     const snapshot = await getDoc(ledRef);
     if (snapshot.exists()) {
       return snapshot.data();
     }
     return null;
-  } catch (error) {
-    console.error('Error fetching LED status:', error);
-    return null;
-  }
+  });
 };
 
 // ===== PRESENCE =====
 export const getPresenceStatus = async () => {
-  try {
+  return safeFirebaseOperation(async () => {
     const presenceRef = doc(db, 'presence', 'sensor');
     const snapshot = await getDoc(presenceRef);
     if (snapshot.exists()) {
       return snapshot.data();
     }
     return null;
-  } catch (error) {
-    console.error('Error fetching presence:', error);
-    return null;
-  }
+  });
 };
 
 // ===== CONVERSION & SESSION TRACKING (NEW) =====
@@ -212,7 +199,7 @@ export const getPresenceStatus = async () => {
  * Steps: 'visit' → 'scanned' → 'clicked' → 'chatted' → 'form_filled'
  */
 export const logConversionStep = async (step, sessionId, additionalData = {}) => {
-  try {
+  return safeFirebaseOperation(async () => {
     await addDoc(collection(db, 'conversion_funnel'), {
       step, // 'visit' | 'scanned' | 'clicked' | 'chatted' | 'form_filled'
       sessionId,
@@ -220,16 +207,14 @@ export const logConversionStep = async (step, sessionId, additionalData = {}) =>
       ...additionalData
     });
     console.log(`✅ Logged conversion step: ${step}`);
-  } catch (error) {
-    console.error(`❌ Error logging conversion step:`, error);
-  }
+  });
 };
 
 /**
  * Log session duration and pages visited
  */
 export const logSessionDuration = async (sessionId, pageType, duration, demographics = {}) => {
-  try {
+  return safeFirebaseOperation(async () => {
     const sessionRef = doc(db, 'sessions', sessionId);
     const sessionSnap = await getDoc(sessionRef);
     
@@ -251,16 +236,14 @@ export const logSessionDuration = async (sessionId, pageType, duration, demograp
       });
       console.log(`✅ Logged session duration: ${pageType} - ${duration}s`);
     }
-  } catch (error) {
-    console.error(`❌ Error logging session duration:`, error);
-  }
+  });
 };
 
 /**
  * Log page transition for user flow tracking
  */
 export const logPageTransition = async (sessionId, fromPage, toPage) => {
-  try {
+  return safeFirebaseOperation(async () => {
     await addDoc(collection(db, 'page_transitions'), {
       sessionId,
       from: fromPage,
@@ -268,16 +251,14 @@ export const logPageTransition = async (sessionId, fromPage, toPage) => {
       timestamp: new Date()
     });
     console.log(`✅ Logged page transition: ${fromPage} → ${toPage}`);
-  } catch (error) {
-    console.error(`❌ Error logging page transition:`, error);
-  }
+  });
 };
 
 /**
  * Get conversion funnel statistics
  */
 export const getConversionFunnel = async () => {
-  try {
+  return safeFirebaseOperation(async () => {
     const conversionRef = collection(db, 'conversion_funnel');
     const snapshot = await getDocs(conversionRef);
     
@@ -304,17 +285,14 @@ export const getConversionFunnel = async () => {
       clickRate: steps.scanned > 0 ? (steps.clicked / steps.scanned * 100).toFixed(1) : 0,
       chatRate: steps.clicked > 0 ? (steps.chatted / steps.clicked * 100).toFixed(1) : 0
     };
-  } catch (error) {
-    console.error('❌ Error getting conversion funnel:', error);
-    return null;
-  }
+  });
 };
 
 /**
  * Get session analytics summary
  */
 export const getSessionAnalytics = async () => {
-  try {
+  return safeFirebaseOperation(async () => {
     const sessionsRef = collection(db, 'sessions');
     const snapshot = await getDocs(sessionsRef);
 
@@ -359,10 +337,7 @@ export const getSessionAnalytics = async () => {
         avgDuration: (metrics.totalDuration / metrics.count).toFixed(1)
       })).sort((a, b) => b.views - a.views)
     };
-  } catch (error) {
-    console.error('❌ Error getting session analytics:', error);
-    return null;
-  }
+  });
 };
 
 // ===== END CONVERSION & SESSION TRACKING =====
