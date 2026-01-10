@@ -43,11 +43,11 @@ const FaceDetection = ({ onDetected }) => {
         console.log('📷 Using Pi5 Camera IMX500');
         // Use snapshot endpoint with faster refresh for smooth display
         const updateSnapshot = () => {
-          setSnapshotRefreshKey(prev => prev + 1);
+          setSnapshotRefreshKey(Date.now()); // Use timestamp to force refresh
         };
         
-        // Update snapshot every 200ms (5 FPS - smooth and responsive)
-        snapshotIntervalRef.current = setInterval(updateSnapshot, 200);
+        // Update snapshot every 100ms (10 FPS - smooth live view)
+        snapshotIntervalRef.current = setInterval(updateSnapshot, 100);
         
         setIsLoading(false);
         voiceService.speak('สวัสดีค่ะ กำลังเชื่อมต่อกล้อง Pi');
@@ -134,6 +134,33 @@ const FaceDetection = ({ onDetected }) => {
       console.log('✅ Face detected!');
       voiceService.speak('ตรวจพบใบหน้าแล้วค่ะ');
       setScanStep('✅ Face Detected!');
+      
+      // Draw face detection box on canvas
+      if (data.faces && data.faces.length > 0 && canvasRef.current && piStreamRef.current) {
+        const face = data.faces[0];
+        const img = piStreamRef.current;
+        const canvas = canvasRef.current;
+        
+        // Set canvas size to match image
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw green box around detected face
+        ctx.strokeStyle = '#00ff00';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(face.x, face.y, face.width, face.height);
+        
+        // Draw label
+        ctx.fillStyle = '#00ff00';
+        ctx.font = '16px Arial';
+        ctx.fillText(`Face ${Math.round(face.confidence * 100)}%`, face.x, face.y - 5);
+        
+        console.log('📦 Drew face box at:', face);
+      }
+      
       for (let i = 30; i <= 60; i += 3) {
         setScanProgress(i);
         await new Promise(resolve => setTimeout(resolve, 15));
@@ -265,7 +292,6 @@ const FaceDetection = ({ onDetected }) => {
   const startVideo = async () => {
     try {
       console.log('📹 Requesting camera access...');
-      alert('📹 ขออนุญาติใช้กล้อง...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: { ideal: 640 },
@@ -273,32 +299,40 @@ const FaceDetection = ({ onDetected }) => {
           facingMode: 'user'
         } 
       });
-      alert('✅ กล้องเปิดสำเร็จ');
       console.log('✅ Camera opened successfully');
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         console.log('✅ Camera started, waiting for video to be ready...');
         
-        // Wait for video to be ready
+        // Start playing video
+        try {
+          await videoRef.current.play();
+          console.log('✅ Video play() started');
+        } catch (e) {
+          console.warn('⚠️ Video play error (might autoplay):', e.message);
+        }
+        
+        // Wait for video to be ready with longer timeout
         return new Promise((resolve, reject) => {
           const checkReady = setInterval(() => {
-            if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-              console.log('✅ Video is ready to use');
+            if (videoRef.current && videoRef.current.readyState >= videoRef.current.HAVE_CURRENT_DATA) {
+              console.log('✅ Video is ready to use, readyState:', videoRef.current.readyState);
               clearInterval(checkReady);
               resolve();
             }
           }, 100);
           
-          // Timeout after 5 seconds
+          // Timeout after 10 seconds (longer for slower cameras)
           setTimeout(() => {
             clearInterval(checkReady);
-            if (videoRef.current && videoRef.current.readyState >= videoRef.current.HAVE_CURRENT_DATA) {
-              console.log('⚠️ Video stream available (partial ready)');
+            if (videoRef.current && videoRef.current.readyState > 0) {
+              console.log('⚠️ Video stream available (readyState=' + videoRef.current.readyState + ')');
               resolve();
             } else {
               reject(new Error('Video did not become ready in time'));
             }
-          }, 5000);
+          }, 10000);
         });
       }
     } catch (error) {
@@ -760,8 +794,14 @@ const FaceDetection = ({ onDetected }) => {
                       console.error('❌ Failed to load Pi camera snapshot');
                       setCameraError(true);
                     }}
-                    onLoad={() => {
+                    onLoad={(e) => {
                       setCameraError(false);
+                      // Update canvas size to match image when loaded
+                      if (canvasRef.current) {
+                        const img = e.target;
+                        canvasRef.current.width = img.naturalWidth || img.width;
+                        canvasRef.current.height = img.naturalHeight || img.height;
+                      }
                     }}
                   />
                   {cameraError && (

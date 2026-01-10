@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import FaceDetection from './components/FaceDetection';
 import AvatarVideo from './components/AvatarVideo';
@@ -20,13 +20,16 @@ function App() {
   const [showAvatar, setShowAvatar] = useState(false);
   const [showTuition, setShowTuition] = useState(false);
   const [isIdle, setIsIdle] = useState(true); // เริ่มต้นที่สไลด์โชว์
-  const [idleTimer, setIdleTimer] = useState(null);
   const [detectedAge, setDetectedAge] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [ageGroup, setAgeGroup] = useState('ADULTS_18_PLUS'); // default age group
+  
+  // Use refs for timer management
+  const idleTimerRef = useRef(null);
+  const resetIdleTimerRef = useRef(null);
 
-  // Idle timeout duration (30 seconds)
+  // Idle timeout duration (1 minute)
   const IDLE_TIMEOUT = 30000;
 
   // Initialize session on app load
@@ -47,22 +50,26 @@ function App() {
     initSession();
   }, []);
 
-  // Reset idle timer
-  const resetIdleTimer = () => {
-    if (idleTimer) {
-      clearTimeout(idleTimer);
+  // Reset idle timer - use useCallback with no dependencies for stability
+  const resetIdleTimer = useCallback(() => {
+    // Clear existing timer
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
     }
     
-    const timer = setTimeout(() => {
+    // Set new timer
+    idleTimerRef.current = setTimeout(() => {
+      console.log('⏰ Idle timeout reached - returning to home');
       setIsIdle(true);
       // กลับไปหน้า home เมื่อ idle
       setCurrentPage('home');
       setShowAvatar(false);
       setShowTuition(false);
     }, IDLE_TIMEOUT);
-    
-    setIdleTimer(timer);
-  };
+  }, []); // No dependencies - function never changes
+
+  // Update ref whenever resetIdleTimer changes
+  resetIdleTimerRef.current = resetIdleTimer;
 
   // Handle user interaction (ออกจาก idle mode)
   const handleUserInteraction = () => {
@@ -81,31 +88,39 @@ function App() {
       voiceService.init();
     }, 1000);
 
-    // ไม่เริ่ม idle timer จนกว่า user จะกดจอครั้งแรก
+    // Make resetIdleTimer available globally for voice service
+    window.resetIdleTimer = resetIdleTimer;
 
-    // Listen for user interactions (เฉพาะเมื่อไม่ได้อยู่ใน idle mode)
+    return () => {
+      window.resetIdleTimer = null;
+    };
+  }, []);
+
+  // Separate useEffect for event listeners to avoid re-registration
+  useEffect(() => {
+    // Listen for user interactions - always reset timer on any interaction
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     
-    const handleEvent = () => {
-      if (!isIdle) {
-        resetIdleTimer();
+    const handleEvent = (e) => {
+      if (resetIdleTimerRef.current) {
+        resetIdleTimerRef.current();
       }
     };
     
     events.forEach(event => {
-      document.addEventListener(event, handleEvent);
+      document.addEventListener(event, handleEvent, { passive: true });
     });
+
+    console.log('✅ Event listeners registered for idle timer reset');
 
     // Cleanup
     return () => {
-      if (idleTimer) {
-        clearTimeout(idleTimer);
-      }
       events.forEach(event => {
         document.removeEventListener(event, handleEvent);
       });
+      console.log('🧹 Event listeners cleaned up');
     };
-  }, [isIdle]);
+  }, []); // Empty deps - register once
 
   useEffect(() => {
 

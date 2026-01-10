@@ -110,6 +110,122 @@ class VoiceService {
   }
 
   /**
+   * Split long text into chunks and speak sequentially
+   */
+  async speakInChunks(text, language = null) {
+    const maxLength = 100; // Shorter chunks for better reliability
+    const chunks = [];
+    
+    console.log(`📢 ข้อความยาว ${text.length} ตัวอักษร - กำลังแบ่งเป็นท่อน`);
+
+    // For Thai text, split by spaces or punctuation
+    if (/[\u0E00-\u0E7F]/.test(text)) {
+      // Thai text - split by spaces and punctuation
+      const parts = text.split(/([,;.!?]\s*|\s+)/);
+      let currentChunk = '';
+      
+      for (const part of parts) {
+        if ((currentChunk + part).length > maxLength && currentChunk.trim()) {
+          chunks.push(currentChunk.trim());
+          console.log(`  ✂️ ท่อน: "${currentChunk.substring(0, 40)}..." (${currentChunk.length} ตัวอักษร)`);
+          currentChunk = part;
+        } else {
+          currentChunk += part;
+        }
+      }
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+        console.log(`  ✂️ ท่อน: "${currentChunk.substring(0, 40)}..." (${currentChunk.length} ตัวอักษร)`);
+      }
+    } else {
+      // English text - split by sentences
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+      let currentChunk = '';
+      
+      for (const sentence of sentences) {
+        if ((currentChunk + sentence).length > maxLength && currentChunk) {
+          chunks.push(currentChunk.trim());
+          console.log(`  ✂️ Chunk: "${currentChunk.substring(0, 40)}..."`);
+          currentChunk = sentence;
+        } else {
+          currentChunk += sentence;
+        }
+      }
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trim());
+        console.log(`  ✂️ Chunk: "${currentChunk.substring(0, 40)}..."`);
+      }
+    }
+
+    console.log(`📢 แบ่งเป็น ${chunks.length} ท่อน`);
+
+    // Speak each chunk sequentially with delay
+    for (let i = 0; i < chunks.length; i++) {
+      console.log(`🔊 กำลังพูดท่อนที่ ${i + 1}/${chunks.length}`);
+      
+      // Reset idle timer before each chunk
+      if (typeof window !== 'undefined' && window.resetIdleTimer) {
+        window.resetIdleTimer();
+      }
+      
+      try {
+        await this.speakSingle(chunks[i], language);
+        console.log(`✅ พูดท่อนที่ ${i + 1} เสร็จแล้ว`);
+      } catch (error) {
+        console.error(`❌ Error พูดท่อนที่ ${i + 1}:`, error);
+      }
+      
+      // Wait between chunks
+      if (i < chunks.length - 1) {
+        console.log(`⏸️ รอ 500ms ก่อนพูดท่อนต่อไป...`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+    
+    console.log(`✅ พูดครบทั้งหมด ${chunks.length} ท่อนแล้ว`);
+  }
+
+  /**
+   * Speak a single chunk of text (internal use)
+   */
+  speakSingle(text, language = null) {
+    return new Promise((resolve, reject) => {
+      const lang = language || this.detectLanguage(text);
+      const settings = this.getVoiceSettings(lang);
+
+      console.log(`  🎤 Speaking: "${text.substring(0, 50)}..."`);
+
+      try {
+        responsiveVoice.speak(text, settings.voice, {
+          pitch: settings.pitch,
+          rate: settings.rate,
+          volume: settings.volume,
+          onstart: () => {
+            console.log(`  ▶️ เริ่มพูด`);
+          },
+          onend: () => {
+            console.log(`  ⏹️ จบ`);
+            resolve();
+          },
+          onerror: (error) => {
+            console.error(`  ❌ Speech error:`, error);
+            resolve(); // Still resolve to continue
+          }
+        });
+      } catch (error) {
+        console.error('  ❌ ResponsiveVoice error:', error);
+        resolve();
+      }
+      
+      // Timeout safety - resolve after 15 seconds max per chunk
+      setTimeout(() => {
+        console.warn(`  ⚠️ Speech timeout for chunk`);
+        resolve();
+      }, 15000);
+    });
+  }
+
+  /**
    * Speak text with auto language detection
    */
   speak(text, language = null) {
@@ -125,6 +241,25 @@ class VoiceService {
     // Check if user has interacted first (silently skip if not)
     if (!this.userInteracted) {
       return Promise.resolve();
+    }
+
+    // Stop any current speech first to prevent conflicts
+    console.log('🛑 หยุดเสียงเก่า (ถ้ามี)');
+    this.stop();
+
+    // Reset idle timer to prevent auto-navigation while speaking
+    if (typeof window !== 'undefined' && window.resetIdleTimer) {
+      window.resetIdleTimer();
+      console.log('⏰ Reset idle timer');
+    }
+
+    // Split long text into chunks (ResponsiveVoice has length limits)
+    const maxLength = 100; // Shorter for better reliability
+    console.log(`📝 ข้อความ: "${text.substring(0, 60)}..." (${text.length} ตัวอักษร)`);
+    
+    if (text.length > maxLength) {
+      console.log(`⚠️ ข้อความยาว (>${maxLength}) - จะแบ่งเป็นท่อน`);
+      return this.speakInChunks(text, language);
     }
 
     return new Promise((resolve) => {
@@ -147,7 +282,7 @@ class VoiceService {
           rate: settings.rate,
           volume: settings.volume,
           onstart: () => {
-            console.log('🔊 เริ่มพูด:', text);
+            console.log('🔊 เริ่มพูด:', text.substring(0, 50) + '...');
           },
           onend: () => {
             this.isSpeaking = false;

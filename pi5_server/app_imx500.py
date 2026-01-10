@@ -141,9 +141,13 @@ def detect_faces_imx500():
     try:
         frame = camera.capture_array("lores")
         
-        face_cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-        )
+        # Use direct path to haarcascade file
+        cascade_path = '/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml'
+        face_cascade = cv2.CascadeClassifier(cascade_path)
+        
+        if face_cascade.empty():
+            print(f"❌ Failed to load cascade classifier from {cascade_path}")
+            return None
         
         gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         faces = face_cascade.detectMultiScale(

@@ -8,13 +8,35 @@ app = Flask(__name__)
 CORS(app)
 
 # OpenCV camera (device 0)
+print("Attempting to open camera device 0...")
 cap = cv2.VideoCapture(0)
 if cap.isOpened():
+    print("Camera opened successfully")
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+else:
+    print("ERROR: Failed to open camera device 0")
+    print("Trying with different backends...")
+    # Try with different backend
+    for backend in [cv2.CAP_V4L2, cv2.CAP_ANY]:
+        cap = cv2.VideoCapture(0, backend)
+        if cap.isOpened():
+            print(f"Camera opened with backend: {backend}")
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            break
+        else:
+            print(f"Failed with backend: {backend}")
 
 camera_running = cap.isOpened()
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+print(f"Camera status: {'Running' if camera_running else 'Not available'}")
+
+# Try to load face cascade classifier
+try:
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+except AttributeError:
+    # Fallback for older OpenCV versions
+    face_cascade = cv2.CascadeClassifier('/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml')
 
 
 def generate_camera_stream():
@@ -50,9 +72,51 @@ def index():
     return jsonify({'status': 'local-camera', 'camera_available': camera_running})
 
 
+@app.route('/api/status')
+def api_status():
+    """API status endpoint"""
+    global cap
+    camera_ok = cap is not None and cap.isOpened()
+    return jsonify({
+        'status': 'running',
+        'camera_available': camera_ok,
+        'camera_type': 'local-opencv',
+        'timestamp': int(time.time() * 1000)
+    })
+
+
 @app.route('/api/camera/stream')
 def camera_stream():
     return Response(generate_camera_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/api/camera/snapshot')
+def camera_snapshot():
+    """Get single frame snapshot as JPEG"""
+    global cap
+    if not cap or not cap.isOpened():
+        return jsonify({'error': 'Camera not available'}), 500
+
+    ret, frame = cap.read()
+    if not ret:
+        return jsonify({'error': 'Failed to capture frame'}), 500
+
+    # Detect faces and draw rectangles
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    # Add overlay text
+    cv2.putText(frame, 'Local Camera (OpenCV)', (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+
+    # Encode as JPEG
+    ret2, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    if not ret2:
+        return jsonify({'error': 'Failed to encode frame'}), 500
+
+    return Response(buffer.tobytes(), mimetype='image/jpeg')
 
 
 @app.route('/api/camera/detect')

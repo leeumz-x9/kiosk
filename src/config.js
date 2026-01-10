@@ -17,17 +17,17 @@ export const GEMINI_API_KEY = "AIzaSyBfeYBUKx7re4wOj7drifj4oXZbPe99Q0o";
 
 // Pi5 IoT Configuration
 export const PI5_CONFIG = {
-  endpoint: "http://172.20.10.2:5000",  // Raspberry Pi IP
-  usePiCamera: true,  // ใช้ Pi Camera IMX500
+  endpoint: "http://172.20.10.3:5000",  // Raspberry Pi IP
+  usePiCamera: false,  // ปิดใช้งาน Pi Camera - ใช้ webcam ธรรมดาแทน
   ledStripPin: 18,
   proximityThreshold: 100, // cm
   camera: {
     type: "IMX500", // Raspberry Pi AI Camera
     resolution: "12MP",
     aiAcceleration: true,
-    streamEndpoint: "http://172.20.10.2:5000/api/face/stream",
-    detectEndpoint: "http://172.20.10.2:5000/api/face/detect",
-    analyzeEndpoint: "http://172.20.10.2:5000/api/face/analyze"
+    streamEndpoint: "http://172.20.10.3:5000/api/face/stream",
+    detectEndpoint: "http://172.20.10.3:5000/api/face/detect",
+    analyzeEndpoint: "http://172.20.10.3:5000/api/face/analyze"
   }
 };
 
