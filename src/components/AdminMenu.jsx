@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ContentAdmin from './ContentAdmin';
+import AgeGroupAdmin from './AgeGroupAdmin';
 import './AdminMenu.css';
 
 const AdminMenu = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [adminCode, setAdminCode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showContentAdmin, setShowContentAdmin] = useState(false);
+  const [showAgeGroupAdmin, setShowAgeGroupAdmin] = useState(false);
 
   // Simple admin passcode (change this to something secure)
   const ADMIN_PASSCODE = '2025';
@@ -134,6 +138,40 @@ const AdminMenu = ({ onNavigate }) => {
                     </motion.button>
 
                     <motion.button
+                      className="menu-item content"
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowContentAdmin(true);
+                      }}
+                      whileHover={{ x: 5, backgroundColor: 'rgba(236, 72, 153, 0.15)' }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="menu-icon">📝</span>
+                      <div className="menu-text">
+                        <h3>จัดการเนื้อหา</h3>
+                        <p>เพิ่ม/แก้ไข/ลบเนื้อหาที่แสดง</p>
+                      </div>
+                      <span className="menu-arrow">→</span>
+                    </motion.button>
+
+                    <motion.button
+                      className="menu-item agegroup"
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowAgeGroupAdmin(true);
+                      }}
+                      whileHover={{ x: 5, backgroundColor: 'rgba(245, 158, 11, 0.15)' }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="menu-icon">🎯</span>
+                      <div className="menu-text">
+                        <h3>จัดการช่วงอายุ</h3>
+                        <p>เพิ่ม/แก้ไข/ลบช่วงอายุ</p>
+                      </div>
+                      <span className="menu-arrow">→</span>
+                    </motion.button>
+
+                    <motion.button
                       className="menu-item firebasedb"
                       onClick={() => window.open('https://console.firebase.google.com', '_blank')}
                       whileHover={{ x: 5, backgroundColor: 'rgba(249, 115, 22, 0.15)' }}
@@ -160,6 +198,16 @@ const AdminMenu = ({ onNavigate }) => {
                       </div>
                       <span className="menu-arrow">→</span>
                     </motion.button>
+
+      {/* Content Admin Panel */}
+      {showContentAdmin && (
+        <ContentAdmin onClose={() => setShowContentAdmin(false)} />
+      )}
+
+      {/* Age Group Admin Panel */}
+      {showAgeGroupAdmin && (
+        <AgeGroupAdmin onClose={() => setShowAgeGroupAdmin(false)} />
+      )}
 
                     <motion.button
                       className="menu-item settings"
@@ -192,6 +240,20 @@ const AdminMenu = ({ onNavigate }) => {
               )}
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Content Admin Panel */}
+      <AnimatePresence>
+        {showContentAdmin && (
+          <ContentAdmin onClose={() => setShowContentAdmin(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Age Group Admin Panel */}
+      <AnimatePresence>
+        {showAgeGroupAdmin && (
+          <AgeGroupAdmin onClose={() => setShowAgeGroupAdmin(false)} />
         )}
       </AnimatePresence>
     </>

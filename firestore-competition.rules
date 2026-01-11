@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===== 🏆 Production Mode สำหรับการแข่งขัน =====
+    
+    // Age Groups - อ่านได้ทุกคน, แก้ไขไม่ได้ (ป้องกัน)
+    match /age_groups/{groupId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Content Items - อ่านได้ทุกคน, แก้ไขไม่ได้ (ป้องกัน)
+    match /content_items/{itemId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Heatmap - บันทึกได้, อ่านได้, แต่ลบ/แก้ไม่ได้
+    match /heatmap/{docId} {
+      allow read: if true;
+      allow create: if true;  // ให้ระบบบันทึก heatmap ได้
+      allow update, delete: if false;
+    }
+    
+    // User Interactions - บันทึกได้เท่านั้น
+    match /user_interactions/{docId} {
+      allow read: if true;
+      allow create: if true;  // ให้บันทึก interaction ได้
+      allow update, delete: if false;
+    }
+    
+    // Sessions - บันทึกได้เท่านั้น
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create: if true;  // ให้บันทึก session ได้
+      allow update, delete: if false;
+    }
+    
+    // Careers - อ่านได้เท่านั้น
+    match /careers/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Pi5 IoT Controls (ยังให้เขียนได้)
+    match /led_status/{document=**} {
+      allow read, write: if true;
+    }
+    
+    match /presence/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

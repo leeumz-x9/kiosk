@@ -7,8 +7,10 @@ import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
 import AdSlideshow from './components/AdSlideshow';
 import KidsMode from './components/KidsMode';
+import ContentPopup from './components/ContentPopup';
+import AdminMenu from './components/AdminMenu';
 import { getAgeGroupConfig } from './config';
-import { createSession, logConversionStep, logPageTransition } from './firebaseService';
+import { createSession, logConversionStep, logPageTransition, logHeatmapClick } from './firebaseService';
 // import { subscribeToPresence, updateLedStatus } from './firebase'; // Commented out - enable when Firebase is configured
 import voiceService, { speak } from './voiceService';
 import './App.css';
@@ -21,16 +23,20 @@ function App() {
   const [showTuition, setShowTuition] = useState(false);
   const [isIdle, setIsIdle] = useState(true); // เริ่มต้นที่สไลด์โชว์
   const [detectedAge, setDetectedAge] = useState(null);
+  const [detectedGender, setDetectedGender] = useState(null);
+  const [detectedEmotion, setDetectedEmotion] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [ageGroup, setAgeGroup] = useState('ADULTS_18_PLUS'); // default age group
+  const [showContentPopup, setShowContentPopup] = useState(false);
   
   // Use refs for timer management
   const idleTimerRef = useRef(null);
   const resetIdleTimerRef = useRef(null);
+  const contentPopupTimerRef = useRef(null);
 
-  // Idle timeout duration (1 minute)
-  const IDLE_TIMEOUT = 30000;
+  // Idle timeout duration (2 minutes)
+  const IDLE_TIMEOUT = 120000;
 
   // Initialize session on app load
   useEffect(() => {
@@ -80,6 +86,19 @@ function App() {
     } else {
       resetIdleTimer(); // reset timer ถ้ากำลังใช้งานอยู่
     }
+  };
+
+  // Handle screen click for heatmap logging
+  const handleScreenClick = (e) => {
+    // คำนวณตำแหน่งเป็น percentage ของหน้าจอ
+    const x = (e.clientX / window.innerWidth) * 100;
+    const y = (e.clientY / window.innerHeight) * 100;
+    
+    // บันทึกลง Firebase
+    logHeatmapClick(x, y, currentPage);
+    
+    // เรียก handleUserInteraction ด้วย
+    handleUserInteraction();
   };
 
   useEffect(() => {
@@ -152,6 +171,7 @@ function App() {
 
   const handleFaceDetected = (interests) => {
     resetIdleTimer();
+    
     // ถ้า user ไม่ยินยอม PDPA ให้ข้ามไปหน้าข้อมูล
     if (interests.skipScan && interests.goToInfo) {
       setCurrentPage('explore');
@@ -159,15 +179,35 @@ function App() {
       return;
     }
     
-    // Handle age detection from face detection component
-    // Note: interests may contain age data in extended format
+    // Handle age, gender, emotion detection from face detection component
     if (interests.age) {
       setDetectedAge(interests.age);
       const config = getAgeGroupConfig(interests.age);
       setAgeGroup(config.id);
     }
     
+    if (interests.gender) {
+      setDetectedGender(interests.gender);
+    }
+    
+    if (interests.emotion) {
+      setDetectedEmotion(interests.emotion);
+    }
+    
     setDetectedInterests(interests);
+    
+    // แสดงป๊อปอัพหลังจาก 10 วินาที
+    if (contentPopupTimerRef.current) {
+      clearTimeout(contentPopupTimerRef.current);
+    }
+    
+    contentPopupTimerRef.current = setTimeout(() => {
+      if (detectedAge) {
+        console.log('🎯 Showing content popup after 10 seconds');
+        setShowContentPopup(true);
+      }
+    }, 10000); // 10 วินาที
+    
     if (interests.length > 0) {
       // Log page transition: home -> explore
       logPageTransition(sessionId, 'home', 'explore');
@@ -179,6 +219,13 @@ function App() {
     setCurrentPage('home');
     setDetectedInterests([]);
     setShowAvatar(false);
+    setShowContentPopup(false);
+    
+    // Clear content popup timer
+    if (contentPopupTimerRef.current) {
+      clearTimeout(contentPopupTimerRef.current);
+    }
+    
     resetIdleTimer();
   };
 
@@ -192,8 +239,21 @@ function App() {
     resetIdleTimer();
   };
 
+  const handleNavigate = (page) => {
+    if (page === 'home') {
+      handleReset();
+    } else if (page === 'analytics') {
+      // Navigate to analytics dashboard
+      // You can add AnalyticsDashboard component here
+      console.log('📊 Navigate to Analytics Dashboard');
+    }
+  };
+
   return (
-    <div className="app">
+    <div className="app" onClick={isIdle ? handleUserInteraction : handleScreenClick}>
+      {/* Admin Menu */}
+      <AdminMenu onNavigate={handleNavigate} />
+      
       {/* Background */}
       <div className="app-background">
         <div className="gradient-orb orb-1"></div>
@@ -321,6 +381,21 @@ function App() {
       {/* Tuition Info Modal */}
       {showTuition && (
         <TuitionInfo onClose={() => setShowTuition(false)} />
+      )}
+      
+      {/* Content Popup - แสดงเนื้อหาตามอายุ */}
+      {showContentPopup && detectedAge && (
+        <ContentPopup
+          age={detectedAge}
+          sessionId={sessionId}
+          sessionData={{
+            age: detectedAge,
+            gender: detectedGender,
+            emotion: detectedEmotion,
+            sessionId: sessionId
+          }}
+          onClose={() => setShowContentPopup(false)}
+        />
       )}
 
       {/* Admin Heatmap (hidden in production) */}

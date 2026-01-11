@@ -20,23 +20,19 @@ class VoiceService {
    */
   init() {
     if (typeof responsiveVoice === 'undefined') {
-      console.warn('ResponsiveVoice not loaded');
+      console.warn('⚠️ ResponsiveVoice not loaded');
       this.isEnabled = false;
       return false;
     }
 
-    // DON'T call responsiveVoice.init() - will be called on first user interaction
-    // Set silent mode to prevent any automatic audio
-    if (responsiveVoice.hasOwnProperty('clickEvent')) {
-      responsiveVoice.clickEvent = false;
-    }
+    // ปิดทุกอย่างที่ ResponsiveVoice พยายาม autoplay
+    responsiveVoice.clickEvent = false;
+    responsiveVoice.enableEstimationTimeout = false;
+    responsiveVoice.enableWindowClickHook = false;
     
-    // Disable welcome message and timeout
-    if (typeof responsiveVoice.enableEstimationTimeout !== 'undefined') {
-      responsiveVoice.enableEstimationTimeout = false;
-    }
-    if (typeof responsiveVoice.enableWindowClickHook !== 'undefined') {
-      responsiveVoice.enableWindowClickHook = false;
+    // Cancel any pending speech
+    if (responsiveVoice.isPlaying()) {
+      responsiveVoice.cancel();
     }
     
     this.initialized = true;
@@ -56,13 +52,23 @@ class VoiceService {
       if (!this.userInteracted) {
         this.userInteracted = true;
         
-        // NOW initialize ResponsiveVoice after user interaction
+        // NOW initialize ResponsiveVoice properly after user interaction
         if (typeof responsiveVoice !== 'undefined') {
-          responsiveVoice.init();
-          console.log('✅ ResponsiveVoice initialized after user interaction');
+          // Make sure it's really initialized
+          if (typeof responsiveVoice.init === 'function') {
+            responsiveVoice.init();
+          }
+          
+          // Test speak ด้วยเสียงเงียบเพื่อ unlock audio context
+          responsiveVoice.speak(' ', 'Thai Female', {
+            volume: 0,
+            onend: () => {
+              console.log('🔓 Audio context unlocked - Voice feedback NOW enabled');
+            }
+          });
         }
         
-        console.log('✅ Audio unlocked - Voice feedback enabled');
+        console.log('✅ ResponsiveVoice initialized after user interaction');
         
         // Remove listeners after first interaction
         document.removeEventListener('click', unlockAudio);

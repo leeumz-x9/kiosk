@@ -95,9 +95,9 @@ const FaceDetection = ({ onDetected }) => {
     try {
       // Step 1: Connecting (smooth progress 0-30%)
       setScanStep('📷 Connecting to Camera...');
-      for (let i = 0; i <= 30; i += 2) {
+      for (let i = 0; i <= 30; i += 3) {
         setScanProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 20));
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       const response = await fetch(`${PI5_CONFIG.endpoint}/api/face/detect`, {
@@ -126,7 +126,7 @@ const FaceDetection = ({ onDetected }) => {
           return;
         }
         
-        setTimeout(() => detectFace(), 800);
+        setTimeout(() => detectFace(), 500);
         return;
       }
 
@@ -161,9 +161,9 @@ const FaceDetection = ({ onDetected }) => {
         console.log('📦 Drew face box at:', face);
       }
       
-      for (let i = 30; i <= 60; i += 3) {
+      for (let i = 30; i <= 60; i += 5) {
         setScanProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 15));
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       // Use data from Pi camera
@@ -190,9 +190,9 @@ const FaceDetection = ({ onDetected }) => {
       // Step 3: Analyzing (60-90%)
       setScanStep('📊 Analyzing Profile...');
       voiceService.speak('กำลังวิเคราะห์ข้อมูลค่ะ');
-      for (let i = 60; i <= 90; i += 2) {
+      for (let i = 60; i <= 90; i += 5) {
         setScanProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 20));
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
       
       const interests = analyzeInterests(age, gender, expressions);
@@ -201,9 +201,9 @@ const FaceDetection = ({ onDetected }) => {
       // Step 4: Complete! (90-100%)
       setScanStep('✨ Analysis Complete!');
       voiceService.speak('วิเคราะห์เสร็จสมบูรณ์ค่ะ');
-      for (let i = 90; i <= 100; i += 2) {
+      for (let i = 90; i <= 100; i += 5) {
         setScanProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 15));
+        await new Promise(resolve => setTimeout(resolve, 8));
       }
       
       const detectedData = {
@@ -241,9 +241,9 @@ const FaceDetection = ({ onDetected }) => {
         setShowParentalConsent(true);
         setShowResultStep(0);
       } else {
-        setTimeout(() => setShowResultStep(1), 500);
-        setTimeout(() => setShowResultStep(2), 1500);
-        setTimeout(() => setShowResultStep(3), 2500);
+        setTimeout(() => setShowResultStep(1), 200);
+        setTimeout(() => setShowResultStep(2), 600);
+        setTimeout(() => setShowResultStep(3), 1000);
         setTimeout(() => {
           setShowResultStep(4);
           if (onDetected) {

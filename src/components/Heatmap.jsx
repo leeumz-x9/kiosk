@@ -46,19 +46,20 @@ const Heatmap = () => {
       ctx.stroke();
     }
 
-    // Draw heatmap points
+    // Draw heatmap points (x, y are percentages 0-100)
     data.forEach(point => {
       const x = (point.x / 100) * width;
       const y = (point.y / 100) * height;
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, 30);
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, 40);
       
-      gradient.addColorStop(0, 'rgba(251, 191, 36, 0.6)');
-      gradient.addColorStop(0.5, 'rgba(16, 185, 129, 0.3)');
-      gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+      gradient.addColorStop(0, 'rgba(239, 68, 68, 0.8)');   // Red center (high intensity)
+      gradient.addColorStop(0.3, 'rgba(251, 191, 36, 0.6)'); // Yellow
+      gradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.3)'); // Green
+      gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');     // Transparent
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(x, y, 30, 0, Math.PI * 2);
+      ctx.arc(x, y, 40, 0, Math.PI * 2);
       ctx.fill();
     });
   };

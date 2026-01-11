@@ -2,19 +2,52 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d5f3a">
   <title>College Kiosk - แนะแนวการศึกษา</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   
-  <!-- ResponsiveVoice API - รองรับ 3 ภาษา (ไทย, อังกฤษ, จีน) -->
-  <script src="https://code.responsivevoice.org/responsivevoice.js?key=KmoDEFR2"></script>
-  <script type="module" crossorigin src="/assets/index-DdhZZO49.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BJtk0Hd_.css">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- ResponsiveVoice API - โหลดแบบ defer และปิด autoplay -->
+  <script>
+    // ปิด ResponsiveVoice autoplay ก่อนโหลด library
+    window.rv_config = {
+      ready: function() {
+        console.log('✅ ResponsiveVoice loaded (silent mode)');
+      }
+    };
+    
+    // Suppress autoplay errors
+    window.addEventListener('unhandledrejection', function(event) {
+      const error = event.reason?.toString() || '';
+      if (error.includes('NotAllowedError') || error.includes('play() failed')) {
+        event.preventDefault();
+        console.log('🔇 Audio autoplay blocked (waiting for user interaction)');
+      }
+    });
+    
+    // Disable ResponsiveVoice features before load
+    window.addEventListener('DOMContentLoaded', function() {
+      if (typeof responsiveVoice !== 'undefined') {
+        responsiveVoice.clickEvent = false;
+        responsiveVoice.enableEstimationTimeout = false;
+        responsiveVoice.enableWindowClickHook = false;
+      }
+    });
+  </script>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=KmoDEFR2" defer></script>
+  <script type="module" crossorigin src="/assets/index-imBrPkCt.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-E-UBV3D8.css">
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root"></div>
 </body>
 </html>

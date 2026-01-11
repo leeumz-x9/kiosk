@@ -4,6 +4,12 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #0d5f3a 0%, #094a2e 100%);
+  /* Mobile optimization */
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .app-background {
@@ -338,8 +344,8 @@
 /* Admin Panel */
 .admin-panel {
   position: fixed;
-  bottom: var(--spacing-sm);
-  right: var(--spacing-sm);
+  bottom: 20px;
+  left: 20px;
   z-index: 100;
   background: var(--bg-card);
   border: 1px solid rgba(16, 185, 129, 0.3);
