@@ -1,6 +1,7 @@
 {
   "projects": {
-    "y": "smart-papr-kiosk"
+    "y": "smart-papr-kiosk",
+    "default": "smart-papr-kiosk"
   },
   "targets": {},
   "etags": {}

@@ -223,6 +223,9 @@ const FaceDetection = ({ onDetected }) => {
       await saveSession({
         sessionId,
         type: 'face_scan_pi5',
+        age,
+        gender, 
+        emotion,
         demographics: { age, gender, emotion },
         interests,
         device: 'pi5_imx500',
@@ -234,7 +237,25 @@ const FaceDetection = ({ onDetected }) => {
       });
       
       setDetectedInfo(detectedData);
-      recordHeatmapClick(0, 0, 'face-scan');
+      
+      // Record heatmap click with actual face center position if available
+      if (data.faces && data.faces[0]) {
+        const face = data.faces[0];
+        const canvas = canvasRef.current;
+        
+        // Calculate face center position as percentage
+        const faceX = (face.x + face.width / 2) / (canvas.width || 1);
+        const faceY = (face.y + face.height / 2) / (canvas.height || 1);
+        
+        // Convert to percentage (0-100)
+        const percentX = Math.min(100, Math.max(0, faceX * 100));
+        const percentY = Math.min(100, Math.max(0, faceY * 100));
+        
+        recordHeatmapClick(percentX, percentY, 'face-scan');
+      } else {
+        // Fallback to center if no face box data
+        recordHeatmapClick(50, 50, 'face-scan');
+      }
 
       // Show results with smooth animation
       if (age < 13) {
@@ -487,6 +508,9 @@ const FaceDetection = ({ onDetected }) => {
       await saveSession({
         sessionId,
         type: 'face_scan_web',
+        age,
+        gender,
+        emotion: dominantEmotion,
         demographics: {
           age,
           gender,
@@ -504,7 +528,25 @@ const FaceDetection = ({ onDetected }) => {
       });
       
       setDetectedInfo(detectedData);
-      recordHeatmapClick(0, 0, 'face-scan');
+      
+      // Record heatmap click with actual face center position from detection
+      if (detections && detections.detection && detections.detection.box) {
+        const box = detections.detection.box;
+        const video = videoRef.current;
+        
+        // Calculate face center position as percentage
+        const faceX = (box.x + box.width / 2) / (video.videoWidth || 1);
+        const faceY = (box.y + box.height / 2) / (video.videoHeight || 1);
+        
+        // Convert to percentage (0-100)
+        const percentX = Math.min(100, Math.max(0, faceX * 100));
+        const percentY = Math.min(100, Math.max(0, faceY * 100));
+        
+        recordHeatmapClick(percentX, percentY, 'face-scan');
+      } else {
+        // Fallback to center if no face box data
+        recordHeatmapClick(50, 50, 'face-scan');
+      }
 
       // Check if parental consent is needed (age < 13)
       if (age < 13) {

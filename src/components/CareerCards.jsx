@@ -19,9 +19,23 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
     });
   }, [suggestedInterests]);
 
-  const handleCardClick = (category) => {
+  const handleCardClick = (category, event) => {
     setSelectedCategory(category);
-    recordHeatmapClick(50, 50, `career-${category.id}`);
+    
+    // Record actual click position for heatmap
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100; // percentage
+    const y = ((event.clientY - rect.top) / rect.height) * 100; // percentage
+    
+    // Scroll modal into view
+    setTimeout(() => {
+      const modalElement = document.querySelector('.detail-modal');
+      if (modalElement) {
+        modalElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+    
+    recordHeatmapClick(x, y, `career-${category.id}`);
     
     // Log conversion step: clicked
     const sessionId = sessionStorage.getItem('sessionId');
@@ -76,18 +90,14 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
 
       {/* Career Cards Grid */}
       <div className="cards-grid">
-        {filteredCategories.map((category, index) => {
+        {filteredCategories.map((category) => {
           const isSuggested = suggestedInterests.includes(category.id);
           
           return (
-            <motion.div
+            <div
               key={category.id}
               className={`career-card ${isSuggested ? 'suggested' : ''}`}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-              onClick={() => handleCardClick(category)}
+              onClick={(event) => handleCardClick(category, event)}
               style={{ 
                 borderColor: isSuggested ? category.color : 'transparent',
                 color: category.color
@@ -113,7 +123,7 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
                   ⭐ แนะนำ
                 </div>
               )}
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -189,7 +199,15 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
                 style={{ 
                   background: `linear-gradient(135deg, ${selectedCategory.color} 0%, ${selectedCategory.color}80 100%)`
                 }}
-                onClick={() => setShowAdmission(true)}
+                onClick={() => {
+                  // Detect Android or iOS or fallback
+                  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                  if (isMobile) {
+                    window.location.href = 'https://www.lannapoly.ac.th/admission/#/?from=website';
+                  } else {
+                    window.open('https://www.lannapoly.ac.th/admission/#/?from=website', '_blank');
+                  }
+                }}
               >
                 📝 สมัครเรียน
               </button>
@@ -221,13 +239,26 @@ const CareerCards = ({ suggestedInterests = [], onAvatarClick }) => {
                   ← กลับ
                 </button>
               </div>
+              {/* Fallback: If iframe fails, show open link button */}
               <iframe
                 src="https://www.lannapoly.ac.th/admission/#/?from=website"
                 className="admission-iframe"
                 title="Online Admission"
                 allowFullScreen
                 loading="lazy"
+                style={{ width: '100%', height: '500px', border: 'none' }}
+                onError={(e) => {
+                  const fallbackBtn = document.getElementById('admission-fallback-btn');
+                  if (fallbackBtn) fallbackBtn.style.display = 'block';
+                }}
               />
+              <button
+                id="admission-fallback-btn"
+                style={{ display: 'none', marginTop: '16px' }}
+                onClick={() => window.open('https://www.lannapoly.ac.th/admission/#/?from=website', '_blank')}
+              >
+                เปิดหน้าสมัครเรียนออนไลน์
+              </button>
             </motion.div>
           </motion.div>
         )}

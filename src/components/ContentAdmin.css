@@ -1,3 +1,46 @@
+/* Standalone mode */
+.content-admin-overlay.standalone {
+  position: relative;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+  z-index: 1;
+}
+
+.content-admin.standalone {
+  border-radius: 0;
+  padding: 1.5rem;
+  background: white;
+  color: #333;
+  max-width: 100%;
+}
+
+.content-admin.standalone .admin-header {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.content-admin.standalone .admin-header h1 {
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.content-admin.standalone .close-btn {
+  display: none !important;
+}
+
+.content-admin.standalone .content-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #333;
+}
+
+.content-admin.standalone .btn-add,
+.content-admin.standalone .btn-save,
+.content-admin.standalone .btn-edit,
+.content-admin.standalone .btn-delete {
+  color: white;
+}
+
 .content-admin-overlay {
   position: fixed;
   top: 0;

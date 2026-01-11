@@ -97,7 +97,8 @@ export const subscribeToHeatmap = (callback) => {
   }
   try {
     const heatmapRef = collection(db, 'heatmap');
-    const q = query(heatmapRef, orderBy('timestamp', 'desc'), limit(100));
+    // ไม่จำกัดจำนวน - เก็บทุกข้อมูลแบบ realtime
+    const q = query(heatmapRef, orderBy('timestamp', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => doc.data());

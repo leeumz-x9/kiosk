@@ -9,83 +9,91 @@ const LoadingTransition = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ 
+        duration: 1.0,
+        ease: [0.4, 0, 0.2, 1]
+      }}
+      style={{ 
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)'
+      }}
     >
       <div className="loading-container">
-        {/* Animated scanning circle */}
+        {/* Static scanning circle - no animation */}
         <motion.div
           className="loading-circle"
-          animate={{
-            boxShadow: [
-              '0 0 0 0 rgba(244, 184, 68, 0.7)',
-              '0 0 0 30px rgba(244, 184, 68, 0.3)',
-              '0 0 0 0 rgba(244, 184, 68, 0)'
-            ]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeOut'
+          style={{ 
+            transform: 'translateZ(0)',
+            WebkitTransform: 'translateZ(0)',
+            boxShadow: '0 0 0 10px rgba(244, 184, 68, 0.3)'
           }}
         >
-          {/* Inner rotating element */}
+          {/* Static inner element - no rotation */}
           <motion.div
             className="loading-inner"
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'linear'
+            style={{ 
+              transform: 'translateZ(0) rotate(0deg)',
+              WebkitTransform: 'translateZ(0) rotate(0deg)'
+            }}
+          >
+            style={{ 
+              transform: 'translateZ(0) rotate(0deg)',
+              WebkitTransform: 'translateZ(0) rotate(0deg)'
             }}
           >
             <div className="loading-dot"></div>
           </motion.div>
         </motion.div>
 
-        {/* Loading text */}
+        {/* Static loading text */}
         <motion.h2
           className="loading-title"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          style={{ 
+            transform: 'translateZ(0)',
+            WebkitTransform: 'translateZ(0)'
+          }}
         >
           เตรียมเริ่มสแกน
         </motion.h2>
 
         <motion.p
           className="loading-subtitle"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          style={{ 
+            transform: 'translateZ(0)',
+            WebkitTransform: 'translateZ(0)'
+          }}
         >
           โปรดรอสักครู่...
         </motion.p>
 
-        {/* Animated loading bars */}
+        {/* Static loading bars - no animation */}
         <div className="loading-bars">
           {[...Array(4)].map((_, i) => (
             <motion.div
               key={i}
               className="loading-bar"
-              animate={{
-                height: ['10px', '30px', '10px']
-              }}
-              transition={{
-                duration: 0.6,
-                delay: i * 0.1,
-                repeat: Infinity,
-                ease: 'easeInOut'
+              style={{ 
+                transform: 'translateZ(0)',
+                WebkitTransform: 'translateZ(0)',
+                height: '20px'
               }}
             />
           ))}
         </div>
 
-        {/* Progress text */}
+        {/* Static progress text */}
         <motion.p
           className="loading-progress"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          style={{ 
+            transform: 'translateZ(0)',
+            WebkitTransform: 'translateZ(0)'
+          }}
         >
           กำลังเปิดกล้อง...
         </motion.p>

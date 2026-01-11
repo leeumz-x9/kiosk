@@ -1,0 +1,63 @@
+/* Global CSS override to slow down all fast animations */
+
+/* Override all fast transitions globally */
+* {
+  transition-duration: 0.8s !important;
+}
+
+*[style*="transition"] {
+  transition-duration: 0.8s !important;
+}
+
+/* Specifically target common fast transitions */
+.btn, button, .card, .item, .menu, .popup, .modal, .overlay {
+  transition: all 0.8s ease !important;
+}
+
+/* Remove overly fast hover effects */
+*:hover {
+  transition: all 0.8s ease !important;
+}
+
+/* Slow down Framer Motion components */
+div[data-framer-motion] {
+  transition-duration: 0.8s !important;
+}
+
+/* Android specific optimizations */
+@media (max-width: 768px), (hover: none) {
+  /* Completely disable animations on mobile/touch devices */
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+  
+  /* Hardware acceleration for smooth performance */
+  * {
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    will-change: auto !important;
+  }
+  
+  /* Remove all hover effects on mobile */
+  *:hover {
+    transition: none !important;
+    animation: none !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+  
+  /* Disable touch callouts and selections */
+  * {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+}

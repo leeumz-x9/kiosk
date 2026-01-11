@@ -33,6 +33,36 @@ service cloud.firestore {
       allow create: if true;
       allow update, delete: if false;
     }
+    
+    // Heatmap clicks collection - Allow write + DELETE for cleanup
+    match /heatmap_clicks/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // Face scan sessions - Allow write + DELETE for cleanup
+    match /face_scan_sessions/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // User sessions - Allow write + DELETE for cleanup
+    match /user_sessions/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // Scan logs - Allow write + DELETE for cleanup
+    match /scan_logs/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // Conversion steps - Allow write + DELETE for cleanup
+    match /conversion_steps/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
 
     // LED status collection - Write from Pi5 server
     match /led_status/{document=**} {
@@ -59,10 +89,10 @@ service cloud.firestore {
       allow write: if false;
     }
     
-    // Age groups - Read only
+    // Age groups - Public read, allow write for setup
     match /age_groups/{groupId} {
       allow read: if true;
-      allow write: if false;
+      allow create, update, delete: if true; // Allow for initial setup and admin management
     }
     
     // User interactions - Log only

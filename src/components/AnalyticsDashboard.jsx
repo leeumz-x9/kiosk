@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
-import { getConversionFunnel, getSessionAnalytics } from '../firebaseService';
 import './AnalyticsDashboard.css';
 
 const AnalyticsDashboard = () => {
-  const [analytics, setAnalytics] = useState(null);
   const [heatmapData, setHeatmapData] = useState([]);
-  const [careerStats, setCareerStats] = useState([]);
-  const [conversionFunnel, setConversionFunnel] = useState(null);
-  const [sessionMetrics, setSessionMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,220 +13,174 @@ const AnalyticsDashboard = () => {
 
   const fetchAnalyticsData = async () => {
     try {
-      // Fetch analytics summary
-      const analyticsRef = collection(db, 'analytics');
-      const analyticsDocs = await getDocs(analyticsRef);
-      const analyticsData = analyticsDocs.docs[0]?.data();
-      setAnalytics(analyticsData);
-
-      // Fetch heatmap data
-      const heatmapRef = collection(db, 'heatmap');
-      const heatmapQuery = query(heatmapRef, orderBy('timestamp', 'desc'), limit(100));
-      const heatmapDocs = await getDocs(heatmapQuery);
-      const heatmapPoints = heatmapDocs.docs.map(doc => doc.data());
-      setHeatmapData(heatmapPoints);
-
-      // Calculate career statistics
-      const careerMap = {};
-      heatmapPoints.forEach(point => {
-        if (point.page) {
-          careerMap[point.page] = (careerMap[point.page] || 0) + 1;
+      // Fetch heatmap data - try multiple collections for real data only
+      let heatmapPoints = [];
+      try {
+        // Try heatmap_clicks first
+        const heatmapRef = collection(db, 'heatmap_clicks');
+        const heatmapQuery = query(heatmapRef, orderBy('timestamp', 'desc'), limit(100));
+        const heatmapDocs = await getDocs(heatmapQuery);
+        heatmapPoints = heatmapDocs.docs.map(doc => {
+          const data = doc.data();
+          return {
+            ...data,
+            id: doc.id,
+            timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp || Date.now())
+          };
+        });
+      } catch (error) {
+        console.log('heatmap_clicks not found, trying heatmap collection...');
+        try {
+          const heatmapRef = collection(db, 'heatmap');
+          const heatmapQuery = query(heatmapRef, orderBy('timestamp', 'desc'), limit(100));
+          const heatmapDocs = await getDocs(heatmapQuery);
+          heatmapPoints = heatmapDocs.docs.map(doc => {
+            const data = doc.data();
+            return {
+              ...data,
+              id: doc.id,
+              timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp || Date.now())
+            };
+          });
+        } catch (error2) {
+          console.log('No heatmap data available');
+          heatmapPoints = [];
         }
+      }
+      
+      // Filter out test data and invalid coordinates
+      const validHeatmapData = heatmapPoints.filter(point => {
+        // Validate real data only
+        return point.x !== undefined && 
+               point.y !== undefined && 
+               point.x >= 0 && point.x <= 100 &&
+               point.y >= 0 && point.y <= 100 &&
+               point.timestamp &&
+               point.category && 
+               point.category !== 'test' && // Remove test data
+               !(point.x === 0 && point.y === 0) && // Remove default (0,0) entries
+               !(point.x === 50 && point.y === 50 && point.category === 'default'); // Remove center default
       });
-      const careerArray = Object.entries(careerMap).map(([page, count]) => ({
-        page,
-        count,
-        percentage: ((count / heatmapPoints.length) * 100).toFixed(1)
-      })).sort((a, b) => b.count - a.count);
-      setCareerStats(careerArray);
 
-      // Fetch conversion funnel data
-      const funnel = await getConversionFunnel();
-      setConversionFunnel(funnel);
-
-      // Fetch session analytics
-      const sessionData = await getSessionAnalytics();
-      setSessionMetrics(sessionData);
-
+      console.log(`📊 Filtered heatmap: ${heatmapPoints.length} total → ${validHeatmapData.length} valid`);
+      setHeatmapData(validHeatmapData);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      console.error('Error fetching heatmap data:', error);
+      setHeatmapData([]);
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div className="analytics-loading">📊 Loading Analytics...</div>;
+    return (
+      <div className="analytics-loading">
+        <div className="loading-spinner"></div>
+        <h2>�️ กำลังโหลด Heatmap...</h2>
+        <p>กำลังดึงข้อมูลการคลิกจาก Firebase</p>
+      </div>
+    );
+  }
+
+  // Check if we have real heatmap data
+  if (heatmapData.length === 0) {
+    return (
+      <div className="analytics-dashboard">
+        <div className="analytics-header">
+          <h1>🗺️ Heatmap</h1>
+          <p>แสดงตำแหน่งการคลิกจริงของผู้ใช้งาน</p>
+        </div>
+        
+        <div className="no-data-state">
+          <div className="no-data-icon">🗺️</div>
+          <h3>ยังไม่มีข้อมูลการคลิก</h3>
+          <p>เริ่มใช้งานระบบเพื่อดู Heatmap การคลิก</p>
+          <button className="refresh-btn" onClick={fetchAnalyticsData}>
+            🔄 ตรวจสอบข้อมูลอีกครั้ง
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="analytics-dashboard">
       <div className="analytics-header">
-        <h1>📊 Kiosk Analytics Dashboard</h1>
-        <p>Real-time performance and user engagement metrics</p>
+        <h1>🗺️ Click Heatmap</h1>
+        <p>ข้อมูลการคลิกจริงจากผู้ใช้งาน (ล่าสุด 100 ครั้ง)</p>
       </div>
 
-      {/* Key Metrics */}
+      {/* Heatmap Stats */}
       <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-label">👥 Total Visits</div>
-          <div className="metric-value">{analytics?.totalVisits || 0}</div>
+          <div className="metric-label">📊 จำนวนการคลิก</div>
+          <div className="metric-value">{heatmapData.length}</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">🔗 Total Sessions</div>
-          <div className="metric-value">{analytics?.totalSessions || 0}</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-label">🎯 Unique Visitors</div>
-          <div className="metric-value">{analytics?.uniqueVisitors || 0}</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-label">⭐ Top Career</div>
-          <div className="metric-value">{analytics?.topCareer || '-'}</div>
+          <div className="metric-label">📅 วันล่าสุด</div>
+          <div className="metric-value">
+            {heatmapData[0]?.timestamp ? 
+              new Date(heatmapData[0].timestamp).toLocaleDateString('th-TH') : 
+              '-'
+            }
+          </div>
         </div>
       </div>
 
       {/* Heatmap Visualization */}
       <div className="analytics-section">
-        <h2>🗺️ Click Heatmap</h2>
-        <div className="heatmap-container">
-          {heatmapData.length > 0 ? (
-            <div className="heatmap-points">
-              {heatmapData.slice(0, 50).map((point, idx) => (
-                <div
-                  key={idx}
-                  className="heatmap-point"
-                  style={{
-                    left: `${(point.x % 640) / 640 * 100}%`,
-                    top: `${(point.y % 480) / 480 * 100}%`,
-                  }}
-                  title={`Page: ${point.page || 'unknown'}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="no-data">No heatmap data yet</p>
-          )}
-        </div>
-        <p className="heatmap-note">Last 50 clicks shown (darker = more recent)</p>
-      </div>
-
-      {/* Career Interest Stats */}
-      <div className="analytics-section">
-        <h2>🎓 Career Interest Distribution</h2>
-        <div className="career-stats">
-          {careerStats.length > 0 ? (
-            careerStats.map((stat, idx) => (
-              <div key={idx} className="stat-row">
-                <div className="stat-name">{stat.page}</div>
-                <div className="stat-bar">
-                  <div 
-                    className="stat-fill"
-                    style={{ width: `${stat.percentage}%` }}
-                  >
-                    <span className="stat-percentage">{stat.percentage}%</span>
-                  </div>
-                </div>
-                <div className="stat-count">{stat.count} clicks</div>
-              </div>
-            ))
-          ) : (
-            <p className="no-data">No career data yet</p>
-          )}
-        </div>
-      </div>
-
-      {/* Session Details */}
-      <div className="analytics-section">
-        <h2>📋 Conversion Funnel</h2>
-        {conversionFunnel ? (
-          <div className="funnel-container">
-            <div className="funnel-step">
-              <div className="funnel-label">👁️ Visits</div>
-              <div className="funnel-bar" style={{ width: '100%' }}>
-                <span className="funnel-value">{conversionFunnel.total}</span>
-              </div>
-            </div>
-            <div className="funnel-step">
-              <div className="funnel-label">📷 Scanned</div>
-              <div className="funnel-bar" style={{ width: `${conversionFunnel.scanRate || 0}%` }}>
-                <span className="funnel-value">{conversionFunnel.scanned || 0}</span>
-              </div>
-              <div className="funnel-rate">{conversionFunnel.scanRate?.toFixed(1)}%</div>
-            </div>
-            <div className="funnel-step">
-              <div className="funnel-label">🎯 Clicked Career</div>
-              <div className="funnel-bar" style={{ width: `${conversionFunnel.clickRate || 0}%` }}>
-                <span className="funnel-value">{conversionFunnel.clicked || 0}</span>
-              </div>
-              <div className="funnel-rate">{conversionFunnel.clickRate?.toFixed(1)}%</div>
-            </div>
-            <div className="funnel-step">
-              <div className="funnel-label">💬 Chatted</div>
-              <div className="funnel-bar" style={{ width: `${conversionFunnel.chatRate || 0}%` }}>
-                <span className="funnel-value">{conversionFunnel.chatted || 0}</span>
-              </div>
-              <div className="funnel-rate">{conversionFunnel.chatRate?.toFixed(1)}%</div>
-            </div>
-            <div className="funnel-step">
-              <div className="funnel-label">📋 Form Completed</div>
-              <div className="funnel-bar" style={{ width: `${(conversionFunnel.form_filled / conversionFunnel.total * 100) || 0}%` }}>
-                <span className="funnel-value">{conversionFunnel.form_filled || 0}</span>
-              </div>
-              <div className="funnel-rate">{((conversionFunnel.form_filled / conversionFunnel.total * 100) || 0).toFixed(1)}%</div>
-            </div>
+        <h2>🗺️ การแสดงผล Heatmap</h2>
+        <p className="section-note">ข้อมูลจริงจาก Firebase - แสดงตำแหน่งที่ผู้ใช้คลิกบนหน้าจอ</p>
+        
+        <div className="heatmap-stats">
+          <div className="heatmap-stat">
+            <span className="stat-label">Total Clicks:</span>
+            <span className="stat-value">{heatmapData.length}</span>
           </div>
-        ) : (
-          <p className="no-data">No conversion data yet</p>
-        )}
-      </div>
-
-      {/* Session Analytics */}
-      <div className="analytics-section">
-        <h2>⏱️ Session Analytics</h2>
-        {sessionMetrics ? (
-          <div className="session-metrics">
-            <div className="metric-row">
-              <span className="metric-name">Total Sessions:</span>
-              <span className="metric-data">{sessionMetrics.sessionCount || 0}</span>
-            </div>
-            <div className="metric-row">
-              <span className="metric-name">Average Session Duration:</span>
-              <span className="metric-data">{sessionMetrics.avgSessionDuration ? (sessionMetrics.avgSessionDuration / 1000).toFixed(1) : '0'}s</span>
-            </div>
-            <div className="metric-row">
-              <span className="metric-name">Total Page Views:</span>
-              <span className="metric-data">{sessionMetrics.totalPageViews || 0}</span>
-            </div>
-            <div className="metric-row">
-              <span className="metric-name">Top Pages:</span>
-              <span className="metric-data">
-                {sessionMetrics.pageMetrics && sessionMetrics.pageMetrics.length > 0
-                  ? sessionMetrics.pageMetrics.slice(0, 3).map(p => p.page).join(', ')
-                  : 'No data'}
-              </span>
-            </div>
+          <div className="heatmap-stat">
+            <span className="stat-label">ช่วงเวลา:</span>
+            <span className="stat-value">
+              {heatmapData[0]?.timestamp ? 
+                new Date(heatmapData[0].timestamp).toLocaleTimeString('th-TH') : 
+                'N/A'
+              }
+            </span>
           </div>
-        ) : (
-          <p className="no-data">No session data yet</p>
-        )}
-      </div>
+        </div>
 
-      {/* Latest Sessions Info */}
-      <div className="analytics-section">
-        <h2>📋 Click Tracking</h2>
-        <p className="section-note">Click tracking data from the last 24 hours</p>
-        <p className="last-updated">
-          Last updated: {analytics?.lastUpdated ? new Date(analytics.lastUpdated.toDate()).toLocaleString() : 'N/A'}
-        </p>
+        <div className="heatmap-visualization">
+          <div className="heatmap-canvas">
+            {heatmapData.slice(0, 100).map((point, idx) => (
+              <div
+                key={point.id || idx}
+                className="heatmap-point"
+                style={{
+                  left: `${point.x || Math.random() * 100}%`,
+                  top: `${point.y || Math.random() * 100}%`,
+                  opacity: Math.max(0.2, 0.8 - (idx / 100))
+                }}
+                title={`หน้า: ${point.page || 'Unknown'} | เวลา: ${
+                  point.timestamp ? 
+                    new Date(point.timestamp).toLocaleString('th-TH') : 
+                    'N/A'
+                }`}
+              />
+            ))}
+          </div>
+          <div className="heatmap-legend">
+            <span>🔴 ล่าสุด</span>
+            <span>🟠 ปานกลาง</span> 
+            <span>🟡 เก่า</span>
+          </div>
+        </div>
       </div>
 
       {/* Refresh Button */}
       <div className="analytics-footer">
         <button className="refresh-btn" onClick={fetchAnalyticsData}>
-          🔄 Refresh Data
+          🔄 รีเฟรชข้อมูล
         </button>
-        <p className="refresh-note">Auto-refresh every 60 seconds</p>
+        <p className="refresh-note">ข้อมูลจริงจาก Firebase เท่านั้น</p>
       </div>
     </div>
   );

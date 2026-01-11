@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { 
   collection, 
   getDocs, 
@@ -13,7 +12,7 @@ import {
 import { db } from '../firebase';
 import './ContentAdmin.css';
 
-export default function ContentAdmin({ onClose }) {
+export default function ContentAdmin({ onClose, standalone = false }) {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingContent, setEditingContent] = useState(null);
@@ -31,19 +30,30 @@ export default function ContentAdmin({ onClose }) {
 
   const contentTypes = [
     { id: 'scholarship', name: 'ทุนการศึกษา', icon: '🎓' },
-    { id: 'news', name: 'ข่าวสาร', icon: '📰' },
+    { id: 'news', name: 'ข่าวสารทั่วไป', icon: '📰' },
+    { id: 'sports', name: 'ข่าวกีฬา', icon: '🏅' },
     { id: 'event', name: 'กิจกรรม', icon: '🎉' },
+    { id: 'competition', name: 'การแข่งขัน', icon: '🏆' },
     { id: 'promotion', name: 'โปรโมชั่น', icon: '🎁' },
     { id: 'career', name: 'สาขาวิชา', icon: '💼' },
-    { id: 'activity', name: 'กิจกรรมนักศึกษา', icon: '⚽' }
+    { id: 'activity', name: 'กิจกรรมนักศึกษา', icon: '⚽' },
+    { id: 'workshop', name: 'เวิร์คช็อป/อบรม', icon: '🛠️' },
+    { id: 'seminar', name: 'สัมมนา', icon: '📚' },
+    { id: 'kids_program', name: 'กิจกรรมเด็ก', icon: '🎨' },
+    { id: 'announcement', name: 'ประกาศ', icon: '📢' }
   ];
 
   const [ageGroups, setAgeGroups] = useState([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    fetchContents();
-    fetchAgeGroups();
-  }, []);
+    // Lazy load - only fetch when component mounts
+    if (!isInitialized) {
+      setIsInitialized(true);
+      fetchContents();
+      fetchAgeGroups();
+    }
+  }, [isInitialized]);
 
   const fetchAgeGroups = async () => {
     if (!db) {
@@ -180,19 +190,15 @@ export default function ContentAdmin({ onClose }) {
   };
 
   return (
-    <motion.div 
-      className="content-admin-overlay"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div 
+      className={`content-admin-overlay ${standalone ? 'standalone' : ''}`}
     >
-      <motion.div 
-        className="content-admin"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+      <div 
+        className={`content-admin ${standalone ? 'standalone' : ''}`}
       >
         <div className="admin-header">
           <h1>🎯 จัดการเนื้อหา Content Management</h1>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          {!standalone && <button className="close-btn" onClick={onClose}>✕</button>}
         </div>
 
         <div className="admin-actions">
@@ -222,10 +228,8 @@ export default function ContentAdmin({ onClose }) {
 
         {/* Form */}
         {showForm && (
-          <motion.form 
+          <form 
             className="content-form"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
             onSubmit={handleSubmit}
           >
             <h2>{editingContent ? '✏️ แก้ไขเนื้อหา' : '➕ เพิ่มเนื้อหาใหม่'}</h2>
@@ -343,7 +347,7 @@ export default function ContentAdmin({ onClose }) {
                 ยกเลิก
               </button>
             </div>
-          </motion.form>
+          </form>
         )}
 
         {/* Content List */}
@@ -363,10 +367,9 @@ export default function ContentAdmin({ onClose }) {
           ) : (
             <div className="content-grid">
               {contents.map(content => (
-                <motion.div 
+                <div 
                   key={content.id} 
                   className={`content-card ${!content.isActive ? 'inactive' : ''}`}
-                  whileHover={{ scale: 1.02 }}
                 >
                   <div className="card-header">
                     <span className="type-badge">
@@ -415,12 +418,12 @@ export default function ContentAdmin({ onClose }) {
                       🗑️ ลบ
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

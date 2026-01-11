@@ -1,25 +1,88 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ContentAdmin from './ContentAdmin';
-import AgeGroupAdmin from './AgeGroupAdmin';
+import React, { useState, useEffect } from 'react';
+import AdminDashboard from './AdminDashboard';
 import './AdminMenu.css';
 
 const AdminMenu = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [adminCode, setAdminCode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showContentAdmin, setShowContentAdmin] = useState(false);
-  const [showAgeGroupAdmin, setShowAgeGroupAdmin] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState('cyberpunk');
 
   // Simple admin passcode (change this to something secure)
   const ADMIN_PASSCODE = '2025';
+
+  // Load theme on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('kioskTheme') || 'cyberpunk';
+    setCurrentTheme(savedTheme);
+    applyTheme(savedTheme);
+  }, []);
+
+  const themes = {
+    cyberpunk: {
+      name: '🌃 Cyberpunk',
+      colors: {
+        '--primary-green': '#00FF41',
+        '--primary-yellow': '#39FF14',
+        '--primary-blue': '#00FFFF',
+        '--accent-red': '#FF0080',
+        '--bg-dark': '#000000',
+        '--bg-card': '#0A0A0A',
+      }
+    },
+    ocean: {
+      name: '🌊 Ocean',
+      colors: {
+        '--primary-green': '#00D9FF',
+        '--primary-yellow': '#1E90FF',
+        '--primary-blue': '#4169E1',
+        '--accent-red': '#FF6B9D',
+        '--bg-dark': '#001B2E',
+        '--bg-card': '#003459',
+      }
+    },
+    sunset: {
+      name: '🌅 Sunset',
+      colors: {
+        '--primary-green': '#FF6B35',
+        '--primary-yellow': '#FFB347',
+        '--primary-blue': '#FF1744',
+        '--accent-red': '#D32F2F',
+        '--bg-dark': '#1A0F0A',
+        '--bg-card': '#3D1F1F',
+      }
+    },
+    purple: {
+      name: '💜 Purple Dream',
+      colors: {
+        '--primary-green': '#D946EF',
+        '--primary-yellow': '#F0ABFC',
+        '--primary-blue': '#C026D3',
+        '--accent-red': '#EC4899',
+        '--bg-dark': '#1A0A1F',
+        '--bg-card': '#2D1B3D',
+      }
+    }
+  };
+
+  const applyTheme = (themeName) => {
+    const theme = themes[themeName];
+    if (!theme) return;
+    
+    const root = document.documentElement;
+    Object.entries(theme.colors).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+    
+    localStorage.setItem('kioskTheme', themeName);
+  };
 
   const handleAdminAccess = () => {
     if (adminCode === ADMIN_PASSCODE) {
       setIsAuthenticated(true);
       setAdminCode('');
-      // Auto-close popup after 1 second
-      setTimeout(() => setIsOpen(false), 500);
+      // Don't close menu - keep it open
     } else {
       alert('❌ รหัสผ่านไม่ถูกต้อง');
       setAdminCode('');
@@ -39,33 +102,24 @@ const AdminMenu = ({ onNavigate }) => {
   return (
     <>
       {/* Admin Toggle Button (Corner) */}
-      <motion.button
+      <button
         className="admin-toggle-btn"
         onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
         title="Admin Panel"
       >
         {isAuthenticated ? '👨‍💼' : '⚙️'}
-      </motion.button>
+      </button>
 
       {/* Admin Menu Popup */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="admin-menu-backdrop"
-            onClick={() => setIsOpen(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      {isOpen && (
+        <div
+          className="admin-menu-backdrop"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="admin-menu-popup"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              className="admin-menu-popup"
-              onClick={(e) => e.stopPropagation()}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
               {!isAuthenticated ? (
                 // Login Form
                 <div className="admin-login">
@@ -109,25 +163,24 @@ const AdminMenu = ({ onNavigate }) => {
                   </div>
 
                   <div className="admin-menu-items">
-                    <motion.button
+                    <button
                       className="menu-item analytics"
-                      onClick={() => handleMenuClick('analytics')}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(102, 126, 234, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setIsOpen(false);
+                        setShowDashboard(true);
+                      }}
                     >
-                      <span className="menu-icon">📊</span>
+                      <span className="menu-icon">📋</span>
                       <div className="menu-text">
-                        <h3>Analytics Dashboard</h3>
-                        <p>View heatmaps and statistics</p>
+                        <h3>Admin Dashboard</h3>
+                        <p>จัดการทุกอย่างที่นี่</p>
                       </div>
                       <span className="menu-arrow">→</span>
-                    </motion.button>
+                    </button>
 
-                    <motion.button
+                    <button
                       className="menu-item careers"
                       onClick={() => handleMenuClick('home')}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(34, 197, 94, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       <span className="menu-icon">🎓</span>
                       <div className="menu-text">
@@ -135,47 +188,11 @@ const AdminMenu = ({ onNavigate }) => {
                         <p>Return to main application</p>
                       </div>
                       <span className="menu-arrow">→</span>
-                    </motion.button>
+                    </button>
 
-                    <motion.button
-                      className="menu-item content"
-                      onClick={() => {
-                        setIsOpen(false);
-                        setShowContentAdmin(true);
-                      }}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(236, 72, 153, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="menu-icon">📝</span>
-                      <div className="menu-text">
-                        <h3>จัดการเนื้อหา</h3>
-                        <p>เพิ่ม/แก้ไข/ลบเนื้อหาที่แสดง</p>
-                      </div>
-                      <span className="menu-arrow">→</span>
-                    </motion.button>
-
-                    <motion.button
-                      className="menu-item agegroup"
-                      onClick={() => {
-                        setIsOpen(false);
-                        setShowAgeGroupAdmin(true);
-                      }}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(245, 158, 11, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="menu-icon">🎯</span>
-                      <div className="menu-text">
-                        <h3>จัดการช่วงอายุ</h3>
-                        <p>เพิ่ม/แก้ไข/ลบช่วงอายุ</p>
-                      </div>
-                      <span className="menu-arrow">→</span>
-                    </motion.button>
-
-                    <motion.button
+                    <button
                       className="menu-item firebasedb"
                       onClick={() => window.open('https://console.firebase.google.com', '_blank')}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(249, 115, 22, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       <span className="menu-icon">🔥</span>
                       <div className="menu-text">
@@ -183,45 +200,26 @@ const AdminMenu = ({ onNavigate }) => {
                         <p>Manage database directly</p>
                       </div>
                       <span className="menu-arrow">↗️</span>
-                    </motion.button>
+                    </button>
+                  </div>
 
-                    <motion.button
-                      className="menu-item stats"
-                      onClick={() => alert('📈 Session Management - Coming Soon!')}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(168, 85, 247, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="menu-icon">📈</span>
-                      <div className="menu-text">
-                        <h3>Session Logs</h3>
-                        <p>View user activity history</p>
-                      </div>
-                      <span className="menu-arrow">→</span>
-                    </motion.button>
-
-      {/* Content Admin Panel */}
-      {showContentAdmin && (
-        <ContentAdmin onClose={() => setShowContentAdmin(false)} />
-      )}
-
-      {/* Age Group Admin Panel */}
-      {showAgeGroupAdmin && (
-        <AgeGroupAdmin onClose={() => setShowAgeGroupAdmin(false)} />
-      )}
-
-                    <motion.button
-                      className="menu-item settings"
-                      onClick={() => alert('⚙️ Settings - Coming Soon!')}
-                      whileHover={{ x: 5, backgroundColor: 'rgba(14, 165, 233, 0.15)' }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="menu-icon">⚙️</span>
-                      <div className="menu-text">
-                        <h3>Kiosk Settings</h3>
-                        <p>Configure kiosk parameters</p>
-                      </div>
-                      <span className="menu-arrow">→</span>
-                    </motion.button>
+                  {/* Theme Selector */}
+                  <div className="theme-section">
+                    <h3>🎨 เปลี่ยนธีมสี</h3>
+                    <div className="theme-grid">
+                      {Object.entries(themes).map(([key, theme]) => (
+                        <button
+                          key={key}
+                          className={`theme-option ${currentTheme === key ? 'active' : ''}`}
+                          onClick={() => {
+                            setCurrentTheme(key);
+                            applyTheme(key);
+                          }}
+                        >
+                          {theme.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="admin-footer">
@@ -238,24 +236,14 @@ const AdminMenu = ({ onNavigate }) => {
                   </div>
                 </div>
               )}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
-      {/* Content Admin Panel */}
-      <AnimatePresence>
-        {showContentAdmin && (
-          <ContentAdmin onClose={() => setShowContentAdmin(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* Age Group Admin Panel */}
-      <AnimatePresence>
-        {showAgeGroupAdmin && (
-          <AgeGroupAdmin onClose={() => setShowAgeGroupAdmin(false)} />
-        )}
-      </AnimatePresence>
+      {/* Admin Dashboard - All in One */}
+      {showDashboard && (
+        <AdminDashboard onClose={() => setShowDashboard(false)} />
+      )}
     </>
   );
 };

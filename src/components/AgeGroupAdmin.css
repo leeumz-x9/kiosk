@@ -1,3 +1,63 @@
+/* Standalone mode */
+.age-group-admin-overlay.standalone {
+  position: relative;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+}
+
+.age-group-admin.standalone {
+  border-radius: 0;
+  padding: 1.5rem;
+  background: white;
+  color: #333;
+}
+
+.age-group-admin.standalone .admin-header {
+  border-bottom-color: #e5e7eb;
+}
+
+.age-group-admin.standalone .admin-header h1 {
+  color: #333;
+  font-size: 1.5rem;
+}
+
+/* Standalone mode */
+.age-group-admin-overlay.standalone {
+  position: relative;
+  background: transparent;
+  padding: 0;
+  overflow: visible;
+  z-index: 1;
+}
+
+.age-group-admin.standalone {
+  border-radius: 0;
+  padding: 1.5rem;
+  background: white;
+  color: #333;
+  max-width: 100%;
+}
+
+.age-group-admin.standalone .admin-header {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.age-group-admin.standalone .admin-header h1 {
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.age-group-admin.standalone .close-btn {
+  display: none !important;
+}
+
+.age-group-admin.standalone .group-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #333;
+}
+
 .age-group-admin-overlay {
   position: fixed;
   top: 0;
@@ -135,6 +195,11 @@
   margin-top: 5px;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group small.warning {
+  color: #ffa500;
+  font-weight: 600;
 }
 
 .form-group textarea {

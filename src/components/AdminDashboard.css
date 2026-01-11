@@ -1,0 +1,270 @@
+/* Admin Dashboard - All-in-one Admin Panel */
+
+.admin-dashboard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.admin-dashboard-panel {
+  background: white;
+  border-radius: 16px;
+  width: 98%;
+  max-width: 1400px;
+  height: 95vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  overflow: hidden;
+}
+
+/* Header */
+.admin-dashboard-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.admin-dashboard-header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.close-btn:active {
+  transform: translateZ(0) scale(0.95);
+  -webkit-transform: translateZ(0) scale(0.95);
+}
+
+/* Tabs Navigation */
+.admin-tabs {
+  display: flex;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 150px;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-weight: 500;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.tab-btn:hover {
+  background: rgba(102, 126, 234, 0.05);
+  color: #667eea;
+}
+
+.tab-btn.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  background: white;
+}
+
+.tab-btn:active {
+  transform: translateZ(0) scale(0.98);
+  -webkit-transform: translateZ(0) scale(0.98);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+.tab-name {
+  font-size: 0.95rem;
+}
+
+/* Content Area */
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #f9fafb;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.tab-content {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Standalone mode adjustments for nested components */
+.tab-content .session-logs-overlay.standalone,
+.tab-content .kiosk-settings-overlay.standalone,
+.tab-content .content-admin-overlay.standalone,
+.tab-content .age-group-admin-overlay.standalone {
+  position: relative;
+  background: transparent;
+  display: block;
+  z-index: 1;
+  padding: 0;
+  overflow: visible;
+}
+
+.tab-content .session-logs-panel.standalone,
+.tab-content .kiosk-settings-panel.standalone,
+.tab-content .content-admin.standalone,
+.tab-content .age-group-admin.standalone {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow-y: visible;
+  background: white;
+}
+
+.tab-content .session-logs-header.standalone,
+.tab-content .kiosk-settings-header.standalone,
+.tab-content .settings-header.standalone,
+.tab-content .content-admin .admin-header .close-btn,
+.tab-content .age-group-admin .admin-header .close-btn {
+  display: none !important;
+}
+
+/* Analytics Dashboard adjustments */
+.tab-content .analytics-dashboard {
+  padding: 1.5rem;
+  background: transparent;
+  min-height: 100%;
+}
+
+.tab-content .analytics-header {
+  margin-bottom: 1.5rem;
+}
+
+.tab-content .analytics-loading {
+  padding: 4rem 2rem;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #667eea;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .admin-dashboard-panel {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .admin-dashboard-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .admin-dashboard-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .admin-tabs {
+    overflow-x: scroll;
+  }
+
+  .tab-btn {
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .tab-icon {
+    font-size: 1.5rem;
+  }
+
+  .tab-name {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .admin-content {
+    padding: 0;
+  }
+}
+
+/* Android Performance Optimizations */
+@media (max-width: 768px) {
+  /* Disable transitions */
+  .admin-dashboard-overlay,
+  .admin-dashboard-panel,
+  .tab-btn,
+  .close-btn {
+    transition: none !important;
+  }
+
+  /* Remove box-shadows */
+  .admin-dashboard-panel {
+    box-shadow: none !important;
+  }
+
+  /* Simplify hover effects */
+  .tab-btn:hover,
+  .close-btn:hover {
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+}

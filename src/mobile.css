@@ -1,5 +1,18 @@
 /* Mobile & Android Optimization */
 
+/* Hardware Acceleration */
+* {
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+}
+
+/* Smooth Scrolling */
+body, html {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+}
+
 /* Remove 300ms tap delay on mobile */
 * {
   -webkit-tap-highlight-color: transparent;
@@ -26,16 +39,20 @@ button, a, input, select, textarea {
   
   /* Admin Button - Larger on mobile */
   .admin-toggle-btn {
-    width: 70px !important;
-    height: 70px !important;
-    font-size: 32px !important;
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 28px !important;
     bottom: 120px !important;
+    right: 20px !important;
   }
   
-  /* Heatmap Button - Adjust position */
-  .admin-panel {
-    bottom: 30px !important;
-    left: 30px !important;
+  /* Heatmap Icon - Above Admin vertically */
+  .heatmap-toggle-icon {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 28px !important;
+    bottom: 195px !important;
+    right: 20px !important;
   }
   
   /* Modal adjustments */

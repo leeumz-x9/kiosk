@@ -1,6 +1,6 @@
 .admin-toggle-btn {
   position: fixed;
-  bottom: 100px;
+  bottom: 20px;
   right: 20px;
   width: 60px;
   height: 60px;
@@ -9,36 +9,23 @@
   border: 3px solid rgba(255, 255, 255, 0.3);
   font-size: 28px;
   cursor: pointer;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 
-              0 0 0 0 rgba(102, 126, 234, 0.7);
-  z-index: 999;
-  transition: all 0.3s ease;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 
-                0 0 0 0 rgba(102, 126, 234, 0.7);
-  }
-  50% {
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 
-                0 0 0 15px rgba(102, 126, 234, 0);
-  }
-  100% {
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 
-                0 0 0 0 rgba(102, 126, 234, 0);
-  }
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
 }
 
 .admin-toggle-btn:hover {
-  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.8);
-  transform: scale(1.15);
-  animation: none;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+  transform: translateZ(0) scale(1.05);
+  -webkit-transform: translateZ(0) scale(1.05);
 }
 
 .admin-toggle-btn:active {
-  transform: scale(1.05);
+  transform: translateZ(0) scale(1.05);
+  -webkit-transform: translateZ(0) scale(1.05);
 }
 
 /* Backdrop */
@@ -48,13 +35,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.2s ease-out;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 @keyframes fadeIn {
@@ -70,12 +60,15 @@
 .admin-menu-popup {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
   overflow-y: auto;
-  animation: slideUp 0.3s ease-out;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  -webkit-overflow-scrolling: touch;
 }
 
 @keyframes slideUp {
@@ -116,7 +109,9 @@
   font-size: 1.1em;
   margin-bottom: 20px;
   box-sizing: border-box;
-  transition: border-color 0.3s;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .admin-input:focus {
@@ -136,12 +131,20 @@
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 10px;
-  transition: all 0.3s;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .btn-admin:hover {
-  transform: translateY(-2px);
+  transform: translateZ(0) translateY(-2px);
+  -webkit-transform: translateZ(0) translateY(-2px);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-admin:active {
+  transform: translateZ(0) scale(0.98);
+  -webkit-transform: translateZ(0) scale(0.98);
 }
 
 .btn-close {
@@ -153,11 +156,63 @@
   border-radius: 8px;
   font-size: 1em;
   cursor: pointer;
-  transition: all 0.3s;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .btn-close:hover {
   background: #e0e0e0;
+}
+
+.btn-close:active {
+  transform: translateZ(0) scale(0.98);
+  -webkit-transform: translateZ(0) scale(0.98);
+}
+
+/* Theme Section */
+.theme-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.theme-section h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.theme-option {
+  padding: 1rem;
+  background: #f9f9f9;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.theme-option:hover {
+  background: #f0f0f0;
+  border-color: #667eea;
+}
+
+.theme-option.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: #667eea;
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .admin-hint {
@@ -212,12 +267,20 @@
   border-radius: 10px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.3s;
   font-family: inherit;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: border-color;
 }
 
 .menu-item:hover {
   border-color: #ddd;
+}
+
+.menu-item:active {
+  transform: translateZ(0) scale(0.98);
+  -webkit-transform: translateZ(0) scale(0.98);
 }
 
 .menu-item.analytics {
@@ -226,6 +289,14 @@
 
 .menu-item.careers {
   border-left: 4px solid #22c55e;
+}
+
+.menu-item.content {
+  border-left: 4px solid #f59e0b;
+}
+
+.menu-item.agegroup {
+  border-left: 4px solid #ec4899;
 }
 
 .menu-item.firebasedb {
@@ -364,5 +435,228 @@
 
   .menu-text p {
     font-size: 0.8em;
+  }
+}
+
+/* Loading Screen */
+.admin-loading {
+  padding: 60px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-loading h2 {
+  margin: 20px 0 10px;
+  font-size: 1.5em;
+}
+
+.admin-loading p {
+  opacity: 0.9;
+  font-size: 1em;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.loading-dots span {
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 
+  40% { 
+    transform: scale(1);
+  }
+}
+
+/* Theme Selector */
+.theme-selector {
+  padding: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.theme-selector h3 {
+  margin: 0 0 15px 0;
+  font-size: 1em;
+  color: #333;
+  text-align: center;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.theme-btn {
+  padding: 12px 16px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: white;
+  color: #333;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.theme-btn:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  transform: translateY(-2px);
+}
+
+.theme-btn.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Mobile Optimizations for Android */
+@media (max-width: 768px) {
+  .admin-menu-popup {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .admin-login {
+    padding: 30px 20px;
+  }
+
+  .admin-login h2 {
+    font-size: 1.5em;
+  }
+
+  .admin-menu-content {
+    padding: 20px;
+  }
+
+  .admin-header h2 {
+    font-size: 1.4em;
+  }
+
+  .menu-item {
+    padding: 14px;
+  }
+
+  .menu-icon {
+    font-size: 1.5em;
+    min-width: 35px;
+  }
+
+  .menu-text h3 {
+    font-size: 0.95em;
+  }
+
+  .menu-text p {
+    font-size: 0.8em;
+  }
+
+  .theme-section h3 {
+    font-size: 1.1rem;
+  }
+
+  .theme-grid {
+    gap: 0.75rem;
+  }
+
+  .theme-option {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* Prevent input zoom on iOS */
+  .admin-input {
+    font-size: 16px;
+  }
+}
+
+/* Android Performance Optimizations - Disable animations */
+@media (max-width: 768px) {
+  /* Disable all non-essential transitions */
+  .admin-menu-backdrop,
+  .admin-menu-popup,
+  .admin-input,
+  .btn-admin,
+  .btn-close,
+  .menu-item,
+  .theme-option,
+  .theme-btn,
+  .btn-logout {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Ensure smooth scrolling */
+  .admin-menu-popup {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
+  }
+
+  /* Reduce box-shadow complexity for better performance */
+  .admin-toggle-btn,
+  .admin-menu-popup,
+  .menu-item,
+  .theme-option.active,
+  .theme-btn.active {
+    box-shadow: none !important;
+  }
+
+  /* Simplify hover effects on touch devices */
+  .admin-toggle-btn:hover,
+  .btn-admin:hover,
+  .btn-close:hover,
+  .menu-item:hover,
+  .theme-option:hover,
+  .theme-btn:hover {
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+
+  /* Keep active states simple */
+  .admin-toggle-btn:active,
+  .btn-admin:active,
+  .btn-close:active,
+  .menu-item:active {
+    transform: translateZ(0) scale(0.98) !important;
+    -webkit-transform: translateZ(0) scale(0.98) !important;
   }
 }

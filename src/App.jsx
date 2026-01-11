@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 import FaceDetection from './components/FaceDetection';
 import AvatarVideo from './components/AvatarVideo';
 import CareerCards from './components/CareerCards';
-import Heatmap from './components/Heatmap';
 import TuitionInfo from './components/TuitionInfo';
 import AdSlideshow from './components/AdSlideshow';
 import KidsMode from './components/KidsMode';
 import ContentPopup from './components/ContentPopup';
 import AdminMenu from './components/AdminMenu';
+import PersonalizedContentPopup from './components/PersonalizedContentPopup';
 import { getAgeGroupConfig } from './config';
 import { createSession, logConversionStep, logPageTransition, logHeatmapClick } from './firebaseService';
 // import { subscribeToPresence, updateLedStatus } from './firebase'; // Commented out - enable when Firebase is configured
@@ -196,17 +196,21 @@ function App() {
     
     setDetectedInterests(interests);
     
-    // แสดงป๊อปอัพหลังจาก 10 วินาที
+    // 🎯 แสดงป๊อปอัพแนะนำข่าวทันทีหลังสแกนหน้าเสร็จ (5 วินาที)
     if (contentPopupTimerRef.current) {
       clearTimeout(contentPopupTimerRef.current);
     }
     
     contentPopupTimerRef.current = setTimeout(() => {
-      if (detectedAge) {
-        console.log('🎯 Showing content popup after 10 seconds');
+      if (interests.age && interests.gender && interests.emotion) {
+        console.log('🎯 Showing personalized content popup with:', {
+          age: interests.age,
+          gender: interests.gender,
+          emotion: interests.emotion
+        });
         setShowContentPopup(true);
       }
-    }, 10000); // 10 วินาที
+    }, 5000); // แสดงหลัง 5 วินาที
     
     if (interests.length > 0) {
       // Log page transition: home -> explore
@@ -242,11 +246,8 @@ function App() {
   const handleNavigate = (page) => {
     if (page === 'home') {
       handleReset();
-    } else if (page === 'analytics') {
-      // Navigate to analytics dashboard
-      // You can add AnalyticsDashboard component here
-      console.log('📊 Navigate to Analytics Dashboard');
     }
+    // Analytics now handled within AdminDashboard
   };
 
   return (
@@ -271,8 +272,8 @@ function App() {
         >
           <div className="logo-icon">🎓</div>
           <div className="logo-text">
-            <h1>Lanna Polythentic College</h1>
-            <p className="logo-subtitle">Uncover Your Future</p>
+            <h1>Lanna Polytechnic Chiangmai</h1>
+            <p className="logo-subtitle">Technological College</p>
           </div>
         </motion.div>
         
@@ -383,31 +384,24 @@ function App() {
         <TuitionInfo onClose={() => setShowTuition(false)} />
       )}
       
-      {/* Content Popup - แสดงเนื้อหาตามอายุ */}
-      {showContentPopup && detectedAge && (
-        <ContentPopup
-          age={detectedAge}
-          sessionId={sessionId}
-          sessionData={{
+      {/* 🎯 Personalized Content Popup - แสดงข่าวตามอายุ/เพศ/อารมณ์ */}
+      {showContentPopup && detectedAge && detectedGender && detectedEmotion && (
+        <PersonalizedContentPopup
+          userProfile={{
             age: detectedAge,
             gender: detectedGender,
-            emotion: detectedEmotion,
-            sessionId: sessionId
+            expression: detectedEmotion
           }}
           onClose={() => setShowContentPopup(false)}
         />
       )}
 
-      {/* Admin Heatmap (hidden in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="admin-panel">
-          <Heatmap />
-        </div>
-      )}
-
       {/* Footer */}
       <footer className="app-footer" style={{ display: isIdle ? 'none' : 'block' }}>
-        <p>© 2025 College Career Guide - Powered by AI & IoT</p>
+        <p>© 2026 วิทยาลัยเทคโนโลยีโปลิเทคนิคลานนา เชียงใหม่</p>
+        <p style={{ fontSize: '0.85rem', marginTop: '0.25rem', opacity: 0.8 }}>
+          จัดทำโดย สาขาเทคโนโลยีสารสนเทศ | Information Technology
+        </p>
       </footer>
     </div>
   );

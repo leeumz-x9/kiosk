@@ -12,7 +12,7 @@ import {
 import { db } from '../firebase';
 import './AgeGroupAdmin.css';
 
-export default function AgeGroupAdmin({ onClose }) {
+export default function AgeGroupAdmin({ onClose, standalone = false }) {
   const [ageGroups, setAgeGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingGroup, setEditingGroup] = useState(null);
@@ -99,10 +99,18 @@ export default function AgeGroupAdmin({ onClose }) {
       };
 
       if (editingGroup) {
-        // Update existing (ไม่สามารถเปลี่ยน ID ได้)
-        const docRef = doc(db, 'age_groups', editingGroup.id);
-        await updateDoc(docRef, groupData);
-        alert('✅ อัปเดตกลุ่มอายุสำเร็จ!');
+        // ถ้า ID เปลี่ยน = ลบเก่า สร้างใหม่
+        if (editingGroup.id !== formData.id) {
+          const oldDocRef = doc(db, 'age_groups', editingGroup.id);
+          await deleteDoc(oldDocRef);
+          await setDoc(doc(db, 'age_groups', formData.id), groupData);
+          alert('✅ เปลี่ยน ID และอัปเดตข้อมูลสำเร็จ!');
+        } else {
+          // ID ไม่เปลี่ยน = อัปเดตตรงๆ
+          const docRef = doc(db, 'age_groups', editingGroup.id);
+          await updateDoc(docRef, groupData);
+          alert('✅ อัปเดตกลุ่มอายุสำเร็จ!');
+        }
       } else {
         // Create new (ใช้ ID ที่กรอกเป็น Document ID)
         await setDoc(doc(db, 'age_groups', formData.id), groupData);
@@ -172,18 +180,18 @@ export default function AgeGroupAdmin({ onClose }) {
 
   return (
     <motion.div 
-      className="age-group-admin-overlay"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      className={`age-group-admin-overlay ${standalone ? 'standalone' : ''}`}
+      initial={standalone ? false : { opacity: 0 }}
+      animate={standalone ? false : { opacity: 1 }}
     >
       <motion.div 
-        className="age-group-admin"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        className={`age-group-admin ${standalone ? 'standalone' : ''}`}
+        initial={standalone ? false : { scale: 0.9, opacity: 0 }}
+        animate={standalone ? false : { scale: 1, opacity: 1 }}
       >
         <div className="admin-header">
           <h1>🎯 จัดการช่วงอายุ (Age Groups)</h1>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          {!standalone && <button className="close-btn" onClick={onClose}>✕</button>}
         </div>
 
         <div className="admin-actions">
@@ -217,14 +225,15 @@ export default function AgeGroupAdmin({ onClose }) {
                 <input
                   type="text"
                   value={formData.id}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value.toLowerCase().replace(/\s/g, '_') })}
-                  placeholder="teens"
+                  onChange={(e) => setFormData({ ...formData, id: e.target.value.toUpperCase().replace(/\s/g, '_') })}
+                  placeholder="GEN_ALPHA"
                   required
-                  disabled={!!editingGroup}
-                  pattern="[a-z_]+"
-                  title="ใช้ภาษาอังกฤษตัวเล็ก และ _ เท่านั้น"
+                  pattern="[A-Z_]+"
+                  title="ใช้ภาษาอังกฤษตัวใหญ่ และ _ เท่านั้น"
                 />
-                <small>ใช้เป็น Key ใน database (ไม่สามารถเปลี่ยนได้)</small>
+                <small className={editingGroup ? 'warning' : ''}>
+                  {editingGroup ? '⚠️ การเปลี่ยน ID จะสร้าง document ใหม่' : 'ใช้เป็น Key ใน database'}
+                </small>
               </div>
 
               <div className="form-group">
@@ -233,7 +242,7 @@ export default function AgeGroupAdmin({ onClose }) {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="วัยรุ่น"
+                  placeholder="Gen Alpha"
                   required
                 />
               </div>
@@ -247,7 +256,8 @@ export default function AgeGroupAdmin({ onClose }) {
                   min="0"
                   max="150"
                   value={formData.ageMin}
-                  onChange={(e) => setFormData({ ...formData, ageMin: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setFormData({ ...formData, ageMin: e.target.value === '' ? '' : Number(e.target.value) })}
+                  onBlur={(e) => setFormData({ ...formData, ageMin: Number(e.target.value) || 0 })}
                   required
                 />
               </div>
@@ -259,7 +269,8 @@ export default function AgeGroupAdmin({ onClose }) {
                   min="0"
                   max="150"
                   value={formData.ageMax}
-                  onChange={(e) => setFormData({ ...formData, ageMax: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setFormData({ ...formData, ageMax: e.target.value === '' ? '' : Number(e.target.value) })}
+                  onBlur={(e) => setFormData({ ...formData, ageMax: Number(e.target.value) || 0 })}
                   required
                 />
               </div>

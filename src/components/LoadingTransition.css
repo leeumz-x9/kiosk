@@ -6,14 +6,20 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #0a4a2e 0%, #0d5f3a 25%, #16a34a 75%, #22c55e 100%);
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-card) 50%, var(--primary-green) 100%);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(0px);
+  /* Hardware acceleration & smooth rendering */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  will-change: opacity;
 }
 
 .loading-container {
@@ -32,6 +38,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: box-shadow;
 }
 
 .loading-inner {
@@ -41,12 +52,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Hardware acceleration for rotation */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .loading-dot {
   width: 12px;
   height: 12px;
-  background: #f4b844;
+  background: var(--primary-yellow);
   border-radius: 50%;
   position: absolute;
   top: 10px;
@@ -85,9 +101,14 @@
 
 .loading-bar {
   width: 8px;
-  background: linear-gradient(180deg, #f4b844 0%, rgba(244, 184, 68, 0.5) 100%);
+  background: linear-gradient(180deg, var(--primary-yellow) 0%, var(--primary-green) 100%);
   border-radius: 4px;
-  box-shadow: 0 0 10px rgba(244, 184, 68, 0.4);
+  box-shadow: 0 0 10px currentColor;
+  /* Hardware acceleration for height animation */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: height;
 }
 
 /* Loading progress text */

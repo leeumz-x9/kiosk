@@ -28,18 +28,23 @@ export { db, rtdb };
 
 // Heatmap functions
 export const recordHeatmapClick = async (x, y, page) => {
+  console.log('🎯 recordHeatmapClick called:', { x, y, page, hasDB: !!db, isConfigured: isFirebaseConfigured });
+  
   if (!isFirebaseConfigured || !db) {
-    return;  // เงียบๆ skip ไม่ต้อง log
+    console.warn('⚠️ Firebase not configured - skipping heatmap recording');
+    return;
   }
+  
   try {
-    await addDoc(collection(db, 'heatmap'), {
+    const docRef = await addDoc(collection(db, 'heatmap_clicks'), {
       x,
       y,
-      page,
+      category: page,
       timestamp: serverTimestamp()
     });
+    console.log('✅ Heatmap click recorded:', { id: docRef.id, x, y, page });
   } catch (error) {
-    console.error('Error recording heatmap:', error);
+    console.error('❌ Error recording heatmap:', error);
   }
 };
 
@@ -47,7 +52,7 @@ export const subscribeToHeatmap = (callback) => {
   if (!isFirebaseConfigured || !db) {
     return () => {};  // ไม่ต้อง log
   }
-  const heatmapRef = collection(db, 'heatmap');
+  const heatmapRef = collection(db, 'heatmap_clicks');
   return onSnapshot(heatmapRef, (snapshot) => {
     const data = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -84,15 +89,25 @@ export const subscribeToPresence = (callback) => {
 
 // Save user session
 export const saveSession = async (sessionData) => {
+  console.log('💾 saveSession called:', { 
+    hasDB: !!db, 
+    isConfigured: isFirebaseConfigured,
+    data: sessionData 
+  });
+  
   if (!isFirebaseConfigured || !db) {
-    return;  // เงียบๆ skip
+    console.warn('⚠️ Firebase not configured - skipping session save');
+    return;
   }
+  
   try {
-    await addDoc(collection(db, 'sessions'), {
+    const docRef = await addDoc(collection(db, 'face_scan_sessions'), {
       ...sessionData,
-      timestamp: serverTimestamp()
+      timestamp: serverTimestamp(),
+      faceDetected: true
     });
+    console.log('✅ Session saved successfully:', docRef.id);
   } catch (error) {
-    console.error('Error saving session:', error);
+    console.error('❌ Error saving session:', error);
   }
 };

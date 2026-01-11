@@ -1,9 +1,20 @@
+/* Root CSS Variables for Theme System */
+:root {
+  /* Default Cyberpunk Theme - Bright Neon Green */
+  --primary-green: #00FF41;
+  --primary-yellow: #39FF14;
+  --primary-blue: #00FFFF;
+  --accent-red: #FF0080;
+  --bg-dark: #000000;
+  --bg-card: #0A0A0A;
+}
+
 .app {
   width: 100vw;
   height: 100vh;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0d5f3a 0%, #094a2e 100%);
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-card) 100%);
   /* Mobile optimization */
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
@@ -25,9 +36,10 @@
 .gradient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.04;
-  animation: float 30s infinite ease-in-out;
+  filter: blur(60px);
+  opacity: 0.03;
+  will-change: transform;
+  pointer-events: none;
 }
 
 .orb-1 {
@@ -36,7 +48,8 @@
   background: radial-gradient(circle, var(--primary-green) 0%, transparent 70%);
   top: -150px;
   left: -150px;
-  animation-delay: 0s;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .orb-2 {
@@ -45,7 +58,8 @@
   background: radial-gradient(circle, var(--primary-yellow) 0%, transparent 70%);
   bottom: -100px;
   right: -100px;
-  animation-delay: -10s;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .orb-3 {
@@ -54,66 +68,49 @@
   background: radial-gradient(circle, var(--primary-blue) 0%, transparent 70%);
   top: 40%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: -5s;
+  transform: translate(-50%, -50%) translateZ(0);
+  -webkit-transform: translate(-50%, -50%) translateZ(0);
 }
 
 @media (min-width: 768px) {
   .gradient-orb {
-    filter: blur(100px);
+    filter: blur(70px);
   }
   
   .orb-1 {
-    width: 400px;
-    height: 400px;
-    top: -180px;
-    left: -180px;
+    width: 350px;
+    height: 350px;
   }
   
   .orb-2 {
-    width: 360px;
-    height: 360px;
-    bottom: -130px;
-    right: -130px;
+    width: 320px;
+    height: 320px;
   }
   
   .orb-3 {
-    width: 320px;
-    height: 320px;
+    width: 280px;
+    height: 280px;
   }
 }
 
 @media (min-width: 1024px) {
   .gradient-orb {
-    filter: blur(120px);
+    filter: blur(80px);
   }
   
   .orb-1 {
-    width: 500px;
-    height: 500px;
-    top: -200px;
-    left: -200px;
-  }
-  
-  .orb-2 {
-    width: 450px;
-    height: 450px;
-    bottom: -150px;
-    right: -150px;
-  }
-  
-  .orb-3 {
     width: 400px;
     height: 400px;
   }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
+  
+  .orb-2 {
+    width: 360px;
+    height: 360px;
   }
-  50% {
-    transform: translate(30px, -30px) scale(1.05);
+  
+  .orb-3 {
+    width: 320px;
+    height: 320px;
   }
 }
 
@@ -142,10 +139,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: rgba(13, 95, 58, 0.7);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(244, 184, 68, 0.2);
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-card) 100%);
+  border-bottom: 2px solid var(--primary-green);
   flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .header-actions {
@@ -158,42 +155,41 @@
 .home-btn {
   padding: 0.5rem 1.25rem;
   background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  border: 1.5px solid var(--primary-blue);
   border-radius: var(--radius-full);
-  color: white;
+  color: var(--primary-blue);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.6s ease;
   white-space: nowrap;
-  backdrop-filter: blur(5px);
 }
 
 .home-btn:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: white;
+  border-color: var(--primary-yellow);
+  color: var(--primary-yellow);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 .scholarships-btn {
   padding: 0.5rem 1.25rem;
-  background: #f4b844;
+  background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
   border: none;
   border-radius: 50px;
-  color: #0d5f3a;
+  color: var(--bg-dark);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.6s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(244, 184, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .scholarships-btn:hover {
-  background: #ffd700;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 12px rgba(244, 184, 68, 0.3);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 }
 
@@ -212,38 +208,38 @@
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 1px;
-  color: white;
+  color: var(--primary-yellow);
   margin: 0;
   line-height: 1.2;
+  text-shadow: 0 0 10px currentColor;
 }
 
 .logo-text .subtitle {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #f4b844;
+  color: var(--primary-blue);
   margin: 0;
   letter-spacing: 0.5px;
 }
 
 .scholarships-btn {
   padding: 12px 28px;
-  background: #f4b844;
-  color: #0d5f3a;
+  background: linear-gradient(135deg, var(--primary-yellow), var(--primary-green));
+  color: var(--bg-dark);
   border: none;
   border-radius: 25px;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.8s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(244, 184, 68, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .scholarships-btn:hover {
-  background: #ffd700;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(244, 184, 68, 0.5);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .status-indicator {
@@ -274,7 +270,6 @@
 /* Main Content */
 .app-main {
   position: relative;
-  z-index: 5;
   height: calc(100vh - 100px);
   padding: 1.5rem 2rem;
   overflow-y: auto;
@@ -325,7 +320,7 @@
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.8s ease;
   box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
   font-family: var(--font-primary);
 }
@@ -341,23 +336,10 @@
   width: 100%;
 }
 
-/* Admin Panel */
+/* Admin Panel - Heatmap Icon */
+/* Admin Panel - No longer needed, button has its own position */
 .admin-panel {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 100;
-  background: var(--bg-card);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm);
-  max-width: 300px;
-  opacity: 0.3;
-  transition: opacity 0.3s ease;
-}
-
-.admin-panel:hover {
-  opacity: 1;
+  /* Heatmap button is now positioned directly */
 }
 
 /* Footer */
@@ -366,10 +348,11 @@
   z-index: 10;
   text-align: center;
   padding: var(--spacing-md);
-  background: rgba(15, 23, 42, 0.5);
-  border-top: 1px solid rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+  border-top: 2px solid var(--primary-green);
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--primary-blue);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive */
@@ -546,5 +529,75 @@
   .btn-primary {
     min-height: 44px;
     min-width: 44px;
+  }
+}
+
+/* Android Performance Optimizations */
+@media (max-width: 768px) {
+  /* Disable blur effects on mobile */
+  .gradient-orb {
+    filter: none !important;
+    opacity: 0.02 !important;
+  }
+
+  /* Remove all transitions on buttons for instant feedback */
+  .home-btn,
+  .scholarships-btn,
+  .career-card,
+  .btn-primary,
+  .nav-btn {
+    transition: none !important;
+  }
+
+  /* Disable pulse animation on mobile */
+  @keyframes pulse {
+    0%, 100% {
+      transform: translateZ(0);
+    }
+    50% {
+      transform: translateZ(0) scale(1.02);
+    }
+  }
+
+  /* Ensure hardware acceleration everywhere */
+  .app,
+  .app-header,
+  .app-main,
+  .app-footer,
+  .home-btn,
+  .career-card {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Optimize scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Remove box-shadows for better performance */
+  .app-header,
+  .app-footer,
+  .career-card,
+  .home-btn {
+    box-shadow: none !important;
+  }
+
+  /* Simplify hover states on touch devices */
+  .career-card:hover,
+  .home-btn:hover,
+  .scholarships-btn:hover {
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+
+  /* Active states with simple scale */
+  .career-card:active,
+  .home-btn:active,
+  .btn-primary:active {
+    transform: translateZ(0) scale(0.97) !important;
+    -webkit-transform: translateZ(0) scale(0.97) !important;
   }
 }
