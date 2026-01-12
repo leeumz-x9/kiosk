@@ -21,6 +21,39 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
   
+  <!-- Version Check & Force Reload Script -->
+  <script>
+    (function() {
+      const CURRENT_VERSION = '2026.01.12.17.30';
+      const VERSION_KEY = 'app_version';
+      
+      // Check version and force reload if different
+      const storedVersion = localStorage.getItem(VERSION_KEY);
+      
+      if (storedVersion && storedVersion !== CURRENT_VERSION) {
+        console.log('🔄 New version detected! Forcing reload...', {
+          old: storedVersion,
+          new: CURRENT_VERSION
+        });
+        
+        // Clear all caches
+        localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+        
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+          });
+        }
+        
+        // Force hard reload
+        window.location.reload(true);
+      } else {
+        localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+        console.log('✅ Version check passed:', CURRENT_VERSION);
+      }
+    })();
+  </script>
+  
   <!-- ResponsiveVoice API - โหลดแบบ defer และปิด autoplay -->
   <script>
     // ปิด ResponsiveVoice autoplay ก่อนโหลด library
@@ -49,8 +82,8 @@
     });
   </script>
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=KmoDEFR2" defer></script>
-  <script type="module" crossorigin src="/assets/index-wsXq9qLx-1768212154228.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DM5rPolQ-1768212154228.css">
+  <script type="module" crossorigin src="/assets/index-Suz5seHH-1768212626294.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DM5rPolQ-1768212626294.css">
 </head>
 <body>
   <div id="root"></div>
