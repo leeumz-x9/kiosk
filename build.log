@@ -1,0 +1,26 @@
+
+> college-kiosk-promax@1.0.0 build
+> vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 649 modules transformed.
+[esbuild css minify]
+▲ [WARNING] Unexpected "}" [css-syntax-error]
+
+    <stdin>:2891:0:
+      2891 │ }
+           ╵ ^
+
+
+rendering chunks...
+computing gzip size...
+dist/index.html                     2.13 kB │ gzip:   1.02 kB
+dist/assets/index-DM5rPolQ.css    111.29 kB │ gzip:  20.42 kB
+dist/assets/index-C5D2BjYL.js   1,470.30 kB │ gzip: 411.54 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 20.74s

@@ -4,7 +4,10 @@ import { getDatabase, ref, set, onValue } from 'firebase/database';
 import { firebaseConfig } from './config';
 
 // Check if Firebase config is set (not placeholder)
-const isFirebaseConfigured = firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
+// Changed: projectId 'smart-papr-kiosk' IS the real project, not a placeholder
+const isFirebaseConfigured = firebaseConfig.apiKey !== 'YOUR_API_KEY' && 
+                             firebaseConfig.projectId && 
+                             firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
 
 // Initialize Firebase only if properly configured
 let app, db, rtdb;

@@ -22,15 +22,15 @@
 4. **คัดลอก config object**:
 ```javascript
 const firebaseConfig = {
-  apiKey: "YOUR_ACTUAL_API_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123:web:abc123",
-  databaseURL: "https://your-project-default-rtdb.firebaseio.com"
+  apiKey: "AIzaSyBD7qwPXdRdzdKTKE9XgT20g1dV7iH49Jo",
+  authDomain: "smart-papr-kiosk.firebaseapp.com",
+  projectId: "smart-papr-kiosk",
+  storageBucket: "smart-papr-kiosk.appspot.com",
+  messagingSenderId: "139324926582",
+  appId: "1:139324926582:web:98889c32aacc42ff634d57",
+  databaseURL: "https://smart-papr-kiosk-default-rtdb.asia-southeast1.firebasedatabase.app",
+  measurementId: "G-7EWY7J8VS1"
 };
-```
 
 ### 3. เปิดใช้ Firestore Database
 1. ไปที่ **Build** > **Firestore Database**
@@ -40,25 +40,108 @@ const firebaseConfig = {
 
 **Firestore Rules (สำหรับ production):**
 ```javascript
-rules_version = '2';
+rules_version='2'
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Sessions collection
+    // Careers collection - Read only (public)
+    match /careers/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Tuition collection - Read only (public)
+    match /tuition/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Sessions collection - Only write from client (immutable logs)
     match /sessions/{sessionId} {
-      allow write: if true; // Allow kiosk to write
-      allow read: if false; // Read only for admin
-    }
-    
-    // Heatmap collection
-    match /heatmap/{docId} {
-      allow write: if true;
-      allow read: if request.auth != null; // Require auth
-    }
-    
-    // Conversions collection
-    match /conversions/{docId} {
-      allow write: if true;
       allow read: if request.auth != null;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // Analytics collection - Read only (admin dashboard)
+    match /analytics/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Heatmap collection - Write from kiosk app
+    match /heatmap/{document=**} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+    
+    // Heatmap clicks collection - Allow write + DELETE for cleanup
+    match /heatmap_clicks/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // Face scan sessions - Allow write + DELETE for cleanup
+    match /face_scan_sessions/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // User sessions - Allow write + DELETE for cleanup
+    match /user_sessions/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // Scan logs - Allow write + DELETE for cleanup
+    match /scan_logs/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+    
+    // Conversion steps - Allow write + DELETE for cleanup
+    match /conversion_steps/{document=**} {
+      allow read, create, delete: if true;
+      allow update: if false;
+    }
+
+    // LED status collection - Write from Pi5 server
+    match /led_status/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Presence collection - Write from Pi5 server
+    match /presence/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // ===== NEW: Content Management =====
+    // Content items - Public read, restricted write
+    match /content_items/{contentId} {
+      allow read: if true;
+      allow create, update, delete: if true; // TODO: เปลี่ยนเป็น auth ในภายหลัง
+    }
+    
+    // Content types - Read only
+    match /content_types/{typeId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Age groups - Public read, allow write for setup
+    match /age_groups/{groupId} {
+      allow read: if true;
+      allow create, update, delete: if true; // Allow for initial setup and admin management
+    }
+    
+    // User interactions - Log only
+    match /user_interactions/{interactionId} {
+      allow read: if false;
+      allow create: if true;
+      allow update, delete: if false;
     }
   }
 }
@@ -72,13 +155,15 @@ service cloud.firestore {
 
 **Realtime Database Rules:**
 ```json
-{
+{{
   "rules": {
-    "led_status": {
+    ".read": true,
+    ".write": true,
+    "presence": {
       ".read": true,
       ".write": true
     },
-    "presence": {
+    "led_status": {
       ".read": true,
       ".write": true
     }
@@ -92,13 +177,13 @@ service cloud.firestore {
 ```javascript
 // Firebase Configuration
 export const firebaseConfig = {
-  apiKey: "YOUR_ACTUAL_API_KEY",           // <-- ใส่ของจริง
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",             // <-- ใส่ของจริง
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123:web:abc123",
-  databaseURL: "https://your-project-default-rtdb.firebaseio.com"  // <-- ใส่ของจริง
+  apiKey: "AIzaSyBD7qwPXdRdzdKTKE9XgT20g1dV7iH49Jo",           // <-- ใส่ของจริง
+  authDomain: "smart-papr-kiosk.firebaseapp.com",
+  projectId: "smart-papr-kiosk",             // <-- ใส่ของจริง
+  storageBucket: "smart-papr-kiosk.firebasestorage.app",
+  messagingSenderId: "139324926582",
+  appId: "1:139324926582:web:98889c32aacc42ff634d57",
+  databaseURL: "https://smart-papr-kiosk-default-rtdb.asia-southeast1.firebasedatabase.app  // <-- ใส่ของจริง
 };
 ```
 

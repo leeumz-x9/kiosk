@@ -3,7 +3,7 @@ export const firebaseConfig = {
   apiKey: "AIzaSyBD7qwPXdRdzdKTKE9XgT20g1dV7iH49Jo",
   authDomain: "smart-papr-kiosk.firebaseapp.com",
   projectId: "smart-papr-kiosk",
-  storageBucket: "smart-papr-kiosk.firebasestorage.app",
+  storageBucket: "smart-papr-kiosk.appspot.com",
   messagingSenderId: "139324926582",
   appId: "1:139324926582:web:98889c32aacc42ff634d57",
   databaseURL: "https://smart-papr-kiosk-default-rtdb.asia-southeast1.firebasedatabase.app",
