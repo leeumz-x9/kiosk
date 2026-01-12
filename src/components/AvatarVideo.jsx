@@ -74,7 +74,7 @@ function AvatarVideo({ onClose, interests = [] }) {
     // ทักทายเมื่อเปิด
     if (!hasGreeted) {
       setTimeout(() => {
-        const greeting = getGreeting(interests);
+        const greeting = getGreeting();
         playVideoAndSpeak('talk', greeting);
         setMessages([{ role: 'assistant', content: greeting }]);
         setHasGreeted(true);
@@ -164,17 +164,18 @@ function AvatarVideo({ onClose, interests = [] }) {
     setCurrentVideo('idle');
 
     try {
-      const response = await askGemini(userMessage, interests);
+      // ส่งคำถามไปยัง Gemini (ภาษาไทยเท่านั้น)
+      const response = await askGemini(userMessage);
       
       // เพิ่มข้อความตอบกลับ
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       
-      // ใช้วิดีโอ talk สำหรับทุกคำตอบ
+      // พูดและแสดงวิดีโอ talk
       playVideoAndSpeak('talk', response);
       
     } catch (error) {
       console.error('Error asking Gemini:', error);
-      const errorMsg = 'ขอโทษค่ะ เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้งนะคะ';
+      const errorMsg = 'ขอโทษค่ะ เกิดข้อผิดพลาดในการเชื่อมต่อ ลองใหม่อีกครั้งนะคะ 😊';
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
       playVideoAndSpeak('talk', errorMsg);
     } finally {

@@ -1,31 +1,73 @@
+/* Admin Toggle Button - Fixed Bottom Right */
 .admin-toggle-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea, #764ba2);
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  font-size: 28px;
+  border: none;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 
+    0 8px 16px rgba(102, 126, 234, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 2147483647 !important;
   pointer-events: auto !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: transform;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.admin-toggle-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.admin-toggle-btn:hover::before {
+  opacity: 1;
 }
 
 .admin-toggle-btn:hover {
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
-  transform: translateZ(0) scale(1.05);
-  -webkit-transform: translateZ(0) scale(1.05);
+  box-shadow: 
+    0 12px 24px rgba(102, 126, 234, 0.4),
+    0 6px 12px rgba(0, 0, 0, 0.3);
+  transform: translateZ(0) scale(1.1) rotate(10deg);
+  -webkit-transform: translateZ(0) scale(1.1) rotate(10deg);
 }
 
 .admin-toggle-btn:active {
   transform: translateZ(0) scale(1.05);
   -webkit-transform: translateZ(0) scale(1.05);
+  box-shadow: 
+    0 4px 8px rgba(102, 126, 234, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.admin-icon {
+  font-size: 32px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* Backdrop */

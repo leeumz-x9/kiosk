@@ -42,7 +42,7 @@ const AdminMenu = ({ onNavigate }) => {
         onClick={() => setIsOpen(!isOpen)}
         title="Admin Panel"
       >
-        {isAuthenticated ? '👨‍💼' : '⚙️'}
+        <span className="admin-icon">{isAuthenticated ? '👨‍💼' : '⚙️'}</span>
       </button>
 
       {/* Admin Menu Popup */}
