@@ -24,6 +24,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.1);
   position: relative;
+  transition: all 0.3s ease;
 }
 
 .content-popup.loading {

@@ -78,6 +78,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body::before {
@@ -93,6 +94,7 @@ body::before {
     radial-gradient(circle at 50% 50%, rgba(0, 255, 159, 0.02) 0%, transparent 50%);
   z-index: 0;
   pointer-events: none;
+  transition: background 0.5s ease;
 }
 
 body::after {
@@ -304,4 +306,16 @@ html {
   .desktop-only {
     display: block;
   }
+}
+
+/* Global Theme Transition Classes */
+* {
+  transition-property: background, background-color, border-color, color, box-shadow;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* Prevent transition on page load */
+.preload * {
+  transition: none !important;
 }

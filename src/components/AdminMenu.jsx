@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminDashboard from './AdminDashboard';
+import { useTheme } from '../ThemeContext';
 import './AdminMenu.css';
 
 const AdminMenu = ({ onNavigate }) => {
@@ -7,76 +8,10 @@ const AdminMenu = ({ onNavigate }) => {
   const [adminCode, setAdminCode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState('cyberpunk');
+  const { currentTheme, themes, changeTheme } = useTheme();
 
   // Simple admin passcode (change this to something secure)
   const ADMIN_PASSCODE = '2025';
-
-  // Load theme on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('kioskTheme') || 'cyberpunk';
-    setCurrentTheme(savedTheme);
-    applyTheme(savedTheme);
-  }, []);
-
-  const themes = {
-    cyberpunk: {
-      name: '🌃 Cyberpunk',
-      colors: {
-        '--primary-green': '#00FF41',
-        '--primary-yellow': '#39FF14',
-        '--primary-blue': '#00FFFF',
-        '--accent-red': '#FF0080',
-        '--bg-dark': '#000000',
-        '--bg-card': '#0A0A0A',
-      }
-    },
-    ocean: {
-      name: '🌊 Ocean',
-      colors: {
-        '--primary-green': '#00D9FF',
-        '--primary-yellow': '#1E90FF',
-        '--primary-blue': '#4169E1',
-        '--accent-red': '#FF6B9D',
-        '--bg-dark': '#001B2E',
-        '--bg-card': '#003459',
-      }
-    },
-    sunset: {
-      name: '🌅 Sunset',
-      colors: {
-        '--primary-green': '#FF6B35',
-        '--primary-yellow': '#FFB347',
-        '--primary-blue': '#FF1744',
-        '--accent-red': '#D32F2F',
-        '--bg-dark': '#1A0F0A',
-        '--bg-card': '#3D1F1F',
-      }
-    },
-    purple: {
-      name: '💜 Purple Dream',
-      colors: {
-        '--primary-green': '#D946EF',
-        '--primary-yellow': '#F0ABFC',
-        '--primary-blue': '#C026D3',
-        '--accent-red': '#EC4899',
-        '--bg-dark': '#1A0A1F',
-        '--bg-card': '#2D1B3D',
-      }
-    }
-  };
-
-  const applyTheme = (themeName) => {
-    const theme = themes[themeName];
-    if (!theme) return;
-    
-    const root = document.documentElement;
-    Object.entries(theme.colors).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-    
-    localStorage.setItem('kioskTheme', themeName);
-  };
 
   const handleAdminAccess = () => {
     if (adminCode === ADMIN_PASSCODE) {
@@ -212,8 +147,7 @@ const AdminMenu = ({ onNavigate }) => {
                           key={key}
                           className={`theme-option ${currentTheme === key ? 'active' : ''}`}
                           onClick={() => {
-                            setCurrentTheme(key);
-                            applyTheme(key);
+                            changeTheme(key);
                           }}
                         >
                           {theme.name}
