@@ -252,7 +252,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);
+  transform: scaleX(-1) rotate(270deg);
   border-radius: 16px;
 }
 
@@ -263,6 +263,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  transform: scaleX(-1) rotate(270deg);
 }
 
 /* Loading State */
@@ -425,7 +426,7 @@
   height: 500px;
   border-radius: 50%;
   object-fit: cover;
-  transform: scaleX(-1);
+  transform: scaleX(-1) rotate(270deg);
   position: relative;
   z-index: 1;
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12),
@@ -1029,6 +1030,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: rotate(90deg) scaleX(-1);
 }
 
 .avatar-placeholder {
