@@ -1525,3 +1525,239 @@
 .btn-scan-manual:active {
   transform: translateY(-1px);
 }
+
+/* ============================= */
+/* RESPONSIVE BREAKPOINTS */
+/* ============================= */
+
+/* Tablet Landscape (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .face-detection-container {
+    padding: 2.5rem 2rem;
+  }
+
+  .consent-card {
+    max-width: 560px;
+    padding: 2.5rem;
+  }
+
+  .consent-title {
+    font-size: 1.65rem;
+  }
+
+  .consent-text {
+    font-size: 0.95rem;
+  }
+}
+
+/* Desktop (1024px - 1919px) */
+@media (min-width: 1024px) and (max-width: 1919px) {
+  .face-detection-container {
+    padding: 3rem 2.5rem;
+  }
+
+  .consent-card {
+    max-width: 640px;
+    padding: 3rem;
+  }
+
+  .consent-title {
+    font-size: 1.85rem;
+  }
+
+  .consent-subtitle {
+    font-size: 1rem;
+  }
+
+  .consent-text {
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* 32-inch Display (1920px - 2559px) */
+@media (min-width: 1920px) and (max-width: 2559px) {
+  .face-detection-container {
+    padding: 4rem 3rem;
+  }
+
+  .consent-card {
+    max-width: 720px;
+    padding: 3.5rem;
+    border-radius: 28px;
+  }
+
+  .consent-icon {
+    font-size: 4rem;
+  }
+
+  .consent-title {
+    font-size: 2.2rem;
+  }
+
+  .consent-subtitle {
+    font-size: 1.15rem;
+  }
+
+  .consent-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+
+  .consent-item {
+    font-size: 1rem;
+    padding: 0.6rem 0 0.6rem 1.75rem;
+  }
+
+  .btn {
+    padding: 1rem 1.75rem;
+    font-size: 1.125rem;
+    border-radius: 14px;
+  }
+
+  .btn-scan-manual {
+    padding: 20px 40px;
+    font-size: 1.3rem;
+    border-radius: 16px;
+  }
+
+  /* Parental Consent Modal */
+  .parental-modal-content {
+    max-width: 850px;
+    padding: 3rem;
+  }
+
+  .parental-modal-content h2 {
+    font-size: 2rem;
+  }
+
+  .child-info h3 {
+    font-size: 1.2rem;
+  }
+
+  .child-info p,
+  .parental-notice p,
+  .parental-privacy p,
+  .parental-notice li,
+  .parental-privacy li {
+    font-size: 1.05rem;
+  }
+
+  .parental-checkbox span {
+    font-size: 1.05rem;
+  }
+
+  .parental-actions .btn {
+    padding: 14px 28px;
+    font-size: 1.05rem;
+  }
+}
+
+/* Extra Large Display (2560px+) */
+@media (min-width: 2560px) {
+  .face-detection-container {
+    padding: 5rem 4rem;
+  }
+
+  .consent-card {
+    max-width: 900px;
+    padding: 4rem;
+    border-radius: 32px;
+  }
+
+  .consent-icon {
+    font-size: 5rem;
+  }
+
+  .consent-title {
+    font-size: 2.75rem;
+  }
+
+  .consent-subtitle {
+    font-size: 1.35rem;
+  }
+
+  .consent-text {
+    font-size: 1.25rem;
+    line-height: 1.9;
+  }
+
+  .consent-item {
+    font-size: 1.15rem;
+    padding: 0.75rem 0 0.75rem 2rem;
+  }
+
+  .btn {
+    padding: 1.25rem 2rem;
+    font-size: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .btn-scan-manual {
+    padding: 24px 48px;
+    font-size: 1.5rem;
+    border-radius: 18px;
+  }
+
+  /* Parental Consent Modal */
+  .parental-modal-content {
+    max-width: 1100px;
+    padding: 4rem;
+  }
+
+  .parental-modal-content h2 {
+    font-size: 2.5rem;
+  }
+
+  .child-info h3 {
+    font-size: 1.5rem;
+  }
+
+  .child-info p,
+  .parental-notice p,
+  .parental-privacy p,
+  .parental-notice li,
+  .parental-privacy li {
+    font-size: 1.2rem;
+  }
+
+  .parental-checkbox input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+  }
+
+  .parental-checkbox span {
+    font-size: 1.2rem;
+  }
+
+  .parental-actions .btn {
+    padding: 16px 32px;
+    font-size: 1.2rem;
+  }
+}
+
+/* Vertical Display Optimization (Portrait Mode) */
+@media (orientation: portrait) and (min-height: 1920px) {
+  .face-detection-container {
+    padding: 4rem 2rem;
+  }
+
+  .consent-card {
+    max-width: 90%;
+  }
+}
+
+/* Horizontal Display Optimization (Landscape Mode) */
+@media (orientation: landscape) and (min-width: 1920px) {
+  .face-detection-container {
+    padding: 2rem 4rem;
+  }
+
+  .consent-card {
+    max-width: 50%;
+  }
+}

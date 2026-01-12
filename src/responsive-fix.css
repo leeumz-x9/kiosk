@@ -127,6 +127,60 @@ button, a, input, select, textarea {
   }
 }
 
+/* 32-inch displays (1920px+) */
+@media (min-width: 1920px) {
+  .career-cards-container {
+    max-width: 1600px;
+    padding: 3rem 2rem;
+  }
+
+  .cards-grid {
+    max-width: 1400px;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+  }
+
+  .career-card {
+    padding: 2.5rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+/* Extra large displays (2560px+) */
+@media (min-width: 2560px) {
+  .career-cards-container {
+    max-width: 2000px;
+    padding: 4rem 3rem;
+  }
+
+  .cards-grid {
+    max-width: 1800px;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 2.5rem;
+  }
+
+  .career-card {
+    padding: 3rem;
+  }
+
+  .section-title {
+    font-size: 3rem;
+  }
+
+  .filter-btn {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+  }
+}
+
 /* Prevent horizontal scroll from animations */
 [class*="motion"],
 [class*="animate"] {

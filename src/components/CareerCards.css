@@ -66,12 +66,12 @@
   cursor: not-allowed;
 }
 
-/* Cards Grid - Modern 2 columns layout */
+/* Cards Grid - Modern responsive layout */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  padding: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: clamp(1rem, 2vw, 1.5rem);
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
@@ -83,11 +83,119 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Responsive - Tablet */
-@media (max-width: 1024px) {
+/* ======================================= */
+/* RESPONSIVE BREAKPOINTS */
+/* ======================================= */
+
+/* Mobile Extra Small (< 375px) */
+@media (max-width: 374px) {
   .cards-grid {
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+    padding: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+
+  .filter-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .career-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .career-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+  }
+
+  .career-title {
+    font-size: 1.1rem;
+  }
+
+  .career-description {
+    font-size: 0.8rem;
+  }
+}
+
+/* Mobile Small (375px - 479px) */
+@media (min-width: 375px) and (max-width: 479px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.875rem;
+  }
+
+  .section-title {
+    font-size: 1.35rem;
+  }
+
+  .filter-btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .career-card {
+    padding: 1.4rem 1.1rem;
+  }
+}
+
+/* Mobile Large (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
     padding: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .filter-btn {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.925rem;
+  }
+}
+
+/* Tablet Landscape (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+    padding: 1.5rem;
+  }
+}
+
+/* Desktop (1280px - 1919px) */
+@media (min-width: 1280px) and (max-width: 1919px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 1.75rem;
   }
 }
 
@@ -95,8 +203,8 @@
   position: relative;
   background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);
   border: 2px solid transparent;
-  border-radius: 24px;
-  padding: 2rem 1.5rem;
+  border-radius: clamp(16px, 2vw, 24px);
+  padding: clamp(1.5rem, 2vw, 2rem) clamp(1rem, 1.5vw, 1.5rem);
   cursor: pointer;
   overflow: hidden;
   display: flex;
@@ -625,5 +733,159 @@
   .back-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* 32-inch Display Optimization (1920px+) */
+@media (min-width: 1920px) {
+  .career-cards-container {
+    padding: 2rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+  }
+
+  .cards-grid {
+    gap: 2.5rem;
+    padding: 2rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .career-card {
+    padding: 2.5rem 2rem;
+  }
+
+  .career-icon {
+    font-size: 4rem;
+    width: 100px;
+    height: 100px;
+  }
+
+  .career-title {
+    font-size: 1.75rem;
+  }
+
+  .career-description {
+    font-size: 1.1rem;
+  }
+
+  .career-salary {
+    font-size: 1.15rem;
+  }
+
+  .career-salary .amount {
+    font-size: 1.5rem;
+  }
+
+  .career-tags .tag {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .career-link {
+    padding: 1rem 2rem;
+    font-size: 1.15rem;
+    min-height: 58px;
+  }
+
+  .external-modal {
+    width: 65%;
+    max-width: 1200px;
+    height: 70vh;
+  }
+
+  .external-header h3 {
+    font-size: 1.5rem;
+  }
+
+  .back-btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.3rem;
+  }
+}
+
+/* Extra Large Display (2560px+) */
+@media (min-width: 2560px) {
+  .career-cards-container {
+    padding: 3rem;
+  }
+
+  .section-title {
+    font-size: 3rem;
+  }
+
+  .filter-btn {
+    padding: 1rem 2rem;
+    font-size: 1.3rem;
+  }
+
+  .cards-grid {
+    gap: 3rem;
+    padding: 3rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .career-card {
+    padding: 3rem 2.5rem;
+    border-radius: 32px;
+  }
+
+  .career-icon {
+    font-size: 5rem;
+    width: 120px;
+    height: 120px;
+  }
+
+  .career-title {
+    font-size: 2.25rem;
+  }
+
+  .career-description {
+    font-size: 1.3rem;
+    line-height: 1.8;
+  }
+
+  .career-salary {
+    font-size: 1.35rem;
+  }
+
+  .career-salary .amount {
+    font-size: 1.75rem;
+  }
+
+  .career-tags .tag {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.15rem;
+  }
+
+  .career-link {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.35rem;
+    min-height: 65px;
+  }
+
+  .external-modal {
+    width: 70%;
+    max-width: 1600px;
+    height: 75vh;
+  }
+
+  .external-header {
+    padding: 1.5rem 2rem;
+  }
+
+  .external-header h3 {
+    font-size: 1.85rem;
+  }
+
+  .back-btn {
+    padding: 1.25rem 3rem;
+    font-size: 1.5rem;
   }
 }

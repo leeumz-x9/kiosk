@@ -98,6 +98,48 @@
   }
 }
 
+@media (min-width: 1920px) {
+  .gradient-orb {
+    filter: blur(90px);
+  }
+  
+  .orb-1 {
+    width: 500px;
+    height: 500px;
+  }
+  
+  .orb-2 {
+    width: 450px;
+    height: 450px;
+  }
+  
+  .orb-3 {
+    width: 400px;
+    height: 400px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .gradient-orb {
+    filter: blur(120px);
+  }
+  
+  .orb-1 {
+    width: 650px;
+    height: 650px;
+  }
+  
+  .orb-2 {
+    width: 600px;
+    height: 600px;
+  }
+  
+  .orb-3 {
+    width: 550px;
+    height: 550px;
+  }
+}
+
 @media (min-width: 1024px) {
   .gradient-orb {
     filter: blur(80px);

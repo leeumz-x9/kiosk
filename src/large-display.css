@@ -1,0 +1,330 @@
+/* Large Display Optimization - 32" and above */
+
+/* ===================================== */
+/* 32-inch Display (1920px - 2559px) */
+/* ===================================== */
+
+@media (min-width: 1920px) and (max-width: 2559px) {
+  /* Global Typography */
+  :root {
+    font-size: 18px;
+  }
+
+  /* App Container */
+  .app {
+    padding: 2rem;
+  }
+
+  /* Admin Controls */
+  .admin-toggle-btn,
+  .heatmap-toggle-icon {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 38px !important;
+  }
+
+  .admin-toggle-btn {
+    bottom: 40px !important;
+    right: 40px !important;
+  }
+
+  .heatmap-toggle-icon {
+    bottom: 140px !important;
+    right: 40px !important;
+  }
+
+  /* Home Component */
+  .home-title {
+    font-size: 4rem;
+  }
+
+  .home-subtitle {
+    font-size: 1.8rem;
+  }
+
+  .start-btn {
+    padding: 1.5rem 3rem;
+    font-size: 1.5rem;
+  }
+
+  /* Modal Dialogs */
+  .modal-overlay {
+    padding: 3rem;
+  }
+
+  .modal-content {
+    max-width: 900px;
+    padding: 3rem;
+  }
+
+  .modal-header {
+    font-size: 2rem;
+    padding-bottom: 1.5rem;
+  }
+
+  /* Buttons */
+  .btn-primary,
+  .btn-secondary {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    min-height: 60px;
+  }
+
+  /* Forms */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 1.1rem;
+    padding: 1rem 1.5rem;
+    min-height: 55px;
+  }
+
+  /* Admin Dashboard */
+  .admin-dashboard {
+    padding: 3rem;
+  }
+
+  .dashboard-title {
+    font-size: 2.5rem;
+  }
+
+  .stat-card {
+    padding: 2rem;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+  }
+
+  .stat-label {
+    font-size: 1.2rem;
+  }
+
+  /* Tables */
+  table {
+    font-size: 1.1rem;
+  }
+
+  th, td {
+    padding: 1.25rem;
+  }
+
+  /* Navigation */
+  .nav-link {
+    font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* ===================================== */
+/* Extra Large Display (2560px+) */
+/* ===================================== */
+
+@media (min-width: 2560px) {
+  /* Global Typography */
+  :root {
+    font-size: 20px;
+  }
+
+  /* App Container */
+  .app {
+    padding: 3rem;
+  }
+
+  /* Admin Controls */
+  .admin-toggle-btn,
+  .heatmap-toggle-icon {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 48px !important;
+  }
+
+  .admin-toggle-btn {
+    bottom: 50px !important;
+    right: 50px !important;
+  }
+
+  .heatmap-toggle-icon {
+    bottom: 170px !important;
+    right: 50px !important;
+  }
+
+  /* Home Component */
+  .home-title {
+    font-size: 5rem;
+  }
+
+  .home-subtitle {
+    font-size: 2.2rem;
+  }
+
+  .start-btn {
+    padding: 2rem 4rem;
+    font-size: 1.8rem;
+  }
+
+  /* Modal Dialogs */
+  .modal-overlay {
+    padding: 4rem;
+  }
+
+  .modal-content {
+    max-width: 1200px;
+    padding: 4rem;
+  }
+
+  .modal-header {
+    font-size: 2.5rem;
+    padding-bottom: 2rem;
+  }
+
+  /* Buttons */
+  .btn-primary,
+  .btn-secondary {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.4rem;
+    min-height: 70px;
+  }
+
+  /* Forms */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 1.3rem;
+    padding: 1.25rem 2rem;
+    min-height: 65px;
+  }
+
+  /* Admin Dashboard */
+  .admin-dashboard {
+    padding: 4rem;
+  }
+
+  .dashboard-title {
+    font-size: 3rem;
+  }
+
+  .stat-card {
+    padding: 2.5rem;
+  }
+
+  .stat-value {
+    font-size: 3rem;
+  }
+
+  .stat-label {
+    font-size: 1.4rem;
+  }
+
+  /* Tables */
+  table {
+    font-size: 1.3rem;
+  }
+
+  th, td {
+    padding: 1.5rem;
+  }
+
+  /* Navigation */
+  .nav-link {
+    font-size: 1.4rem;
+    padding: 1.25rem 2rem;
+  }
+}
+
+/* ===================================== */
+/* Portrait Orientation (Vertical 32") */
+/* ===================================== */
+
+@media (orientation: portrait) and (min-width: 1080px) and (min-height: 1920px) {
+  /* Optimize for vertical display */
+  .app {
+    padding: 3rem 2rem;
+  }
+
+  .career-cards-container {
+    max-width: 100%;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .face-detection-container {
+    padding: 4rem 2rem;
+  }
+
+  .consent-card {
+    max-width: 700px;
+  }
+}
+
+/* ===================================== */
+/* Landscape Orientation (Horizontal 32") */
+/* ===================================== */
+
+@media (orientation: landscape) and (min-width: 1920px) and (min-height: 1080px) {
+  /* Optimize for horizontal display */
+  .career-cards-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .face-detection-container {
+    padding: 2rem 4rem;
+  }
+
+  .consent-card {
+    max-width: 60%;
+  }
+}
+
+/* ===================================== */
+/* Touch Target Optimization for Large Displays */
+/* ===================================== */
+
+@media (min-width: 1920px) {
+  /* Ensure touch targets are large enough */
+  button,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  .clickable {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Increase tap area for better UX */
+  .interactive-element {
+    padding: 0.75rem;
+  }
+}
+
+/* ===================================== */
+/* High DPI Display Support */
+/* ===================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure sharp rendering on high-DPI displays */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Sharper borders */
+  .career-card,
+  .modal-content,
+  .consent-card {
+    border-width: 1.5px;
+  }
+}
