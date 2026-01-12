@@ -4,14 +4,14 @@ import { getDatabase, ref, set, onValue } from 'firebase/database';
 import { firebaseConfig } from './config';
 
 // Check if Firebase config is set (not placeholder)
-// Changed: projectId 'smart-papr-kiosk' IS the real project, not a placeholder
-const isFirebaseConfigured = firebaseConfig.apiKey !== 'YOUR_API_KEY' && 
+const isFirebaseConfigured = firebaseConfig.apiKey && 
+                             firebaseConfig.apiKey !== 'YOUR_API_KEY' && 
                              firebaseConfig.projectId && 
                              firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
 
 // Initialize Firebase only if properly configured
 let app, db, rtdb;
-let warningShown = false;  // ตัวแปรติดตามการแสดง warning ซ้ำ
+let warningShown = false;
 
 if (isFirebaseConfigured) {
   try {
@@ -23,7 +23,7 @@ if (isFirebaseConfigured) {
     console.warn('⚠️ Firebase initialization failed:', error.message);
   }
 } else {
-  // Firebase ใช้ placeholder config - features disabled (ไม่แสดง warning)
+  console.warn('⚠️ Firebase not configured - using default configuration');
   warningShown = true;
 }
 

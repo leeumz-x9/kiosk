@@ -1,6 +1,6 @@
 {
-  "version": "2026.01.12.17.30",
-  "buildTime": "2026-01-12T17:30:00Z",
-  "timestamp": 1736705400000,
-  "message": "Cache busting update - Force reload all clients"
+  "version": "2026.01.12.18.00",
+  "buildTime": "2026-01-12T18:00:00Z",
+  "timestamp": 1736707200000,
+  "message": "Fix Firebase permissions on Android - Force reload all clients"
 }

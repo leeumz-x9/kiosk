@@ -25,13 +25,18 @@ const isFirebaseConfigured = firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
 // Helper to safely execute Firebase operations
 const safeFirebaseOperation = async (operation, fallbackValue = null) => {
   if (!isFirebaseConfigured || !db) {
-    // เงียบๆ skip ไม่ต้อง log ทุกครั้ง
+    // Firebase not available - skip silently
     return fallbackValue;
   }
   try {
     return await operation();
   } catch (error) {
-    console.error('Firebase operation error:', error);
+    // Silently handle permission errors on mobile/restricted environments
+    if (error.code === 'permission-denied' || error.message?.includes('permissions')) {
+      console.warn('⚠️ Firebase operation skipped (insufficient permissions)');
+    } else {
+      console.error('Firebase operation error:', error);
+    }
     return fallbackValue;
   }
 };
