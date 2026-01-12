@@ -35,23 +35,63 @@ function AvatarVideo({ onClose, interests = [] }) {
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = 'th-TH';
+      recognition.maxAlternatives = 1;
+      
+      recognition.onstart = () => {
+        console.log('🎤 เริ่มฟังเสียง...');
+        setIsListening(true);
+      };
       
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
+        console.log('✅ ได้ยิน:', transcript);
         setInputText(transcript);
         setIsListening(false);
+        
+        // ส่งคำถามอัตโนมัติหลังจากรับเสียง
+        setTimeout(() => {
+          if (transcript.trim()) {
+            handleSendMessage(transcript);
+          }
+        }, 100);
       };
       
       recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error('❌ Speech recognition error:', event.error);
+        
+        let errorMsg = '';
+        switch(event.error) {
+          case 'not-allowed':
+          case 'service-not-allowed':
+            errorMsg = 'กรุณาอนุญาตการใช้ไมโครโฟนในเบราว์เซอร์';
+            break;
+          case 'no-speech':
+            errorMsg = 'ไม่ได้ยินเสียงพูด ลองพูดใหม่อีกครั้งค่ะ';
+            break;
+          case 'audio-capture':
+            errorMsg = 'ไม่พบไมโครโฟน กรุณาตรวจสอบอุปกรณ์';
+            break;
+          case 'network':
+            errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+            break;
+          default:
+            errorMsg = `เกิดข้อผิดพลาด: ${event.error}`;
+        }
+        
+        if (errorMsg) {
+          alert(errorMsg);
+        }
         setIsListening(false);
       };
       
       recognition.onend = () => {
+        console.log('🛑 หยุดฟังเสียง');
         setIsListening(false);
       };
       
       recognitionRef.current = recognition;
+    } else {
+      console.warn('⚠️ เบราว์เซอร์ไม่รองรับ Speech Recognition');
     }
   }, []);
 
@@ -150,11 +190,10 @@ function AvatarVideo({ onClose, interests = [] }) {
     }
   };
 
-  const handleSend = async () => {
-    if (!inputText.trim()) return;
+  const handleSendMessage = async (messageText) => {
+    if (!messageText || !messageText.trim()) return;
 
-    const userMessage = inputText.trim();
-    setInputText('');
+    const userMessage = messageText.trim();
     
     // เพิ่มข้อความผู้ใช้
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -183,27 +222,57 @@ function AvatarVideo({ onClose, interests = [] }) {
     }
   };
 
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+    const messageText = inputText;
+    setInputText('');
+    await handleSendMessage(messageText);
+  };
+
   const handleQuickQuestion = (question, videoType = 'talk') => {
     setInputText(question);
     setTimeout(() => handleSend(), 100);
   };
 
-  const toggleVoiceInput = () => {
+  const toggleVoiceInput = async () => {
     if (!recognitionRef.current) {
-      alert('เบราว์เซอร์ของคุณไม่รองรับการรับเสียง กรุณาใช้ Google Chrome');
+      alert('⚠️ เบราว์เซอร์ของคุณไม่รองรับการรับเสียง\n\nกรุณาใช้ Google Chrome บน HTTPS');
       return;
     }
 
     if (isListening) {
-      recognitionRef.current.stop();
+      // หยุดฟัง
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {
+        console.error('Error stopping recognition:', err);
+      }
       setIsListening(false);
     } else {
+      // ตรวจสอบสิทธิ์ไมโครโฟน
       try {
+        // ขออนุญาตใช้ไมโครโฟน
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop()); // ปิด stream ทันที
+        
+        // เริ่มฟังเสียง
         recognitionRef.current.start();
         setIsListening(true);
         setCurrentVideo('idle');
+        console.log('🎤 เริ่มการรับเสียง...');
       } catch (error) {
-        console.error('Error starting recognition:', error);
+        console.error('Microphone permission error:', error);
+        
+        let errorMsg = '⚠️ ไม่สามารถเข้าถึงไมโครโฟนได้\n\n';
+        if (error.name === 'NotAllowedError') {
+          errorMsg += 'กรุณาอนุญาตการใช้ไมโครโฟนในเบราว์เซอร์\nคลิกที่ไอคอนล็อคหรือกล้อง ด้านซ้ายของแถบ URL';
+        } else if (error.name === 'NotFoundError') {
+          errorMsg += 'ไม่พบไมโครโฟน กรุณาเชื่อมต่ออุปกรณ์ไมโครโฟน';
+        } else {
+          errorMsg += 'เกิดข้อผิดพลาด: ' + error.message;
+        }
+        
+        alert(errorMsg);
         setIsListening(false);
       }
     }

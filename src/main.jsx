@@ -4,6 +4,7 @@ import App from './App';
 import { ThemeProvider } from './ThemeContext';
 import './styles.css';
 import './mobile.css';
+import './responsive-fix.css';
 import './global-animation-fix.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

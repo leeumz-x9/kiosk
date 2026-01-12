@@ -73,7 +73,7 @@
   gap: 2rem;
   padding: 1.5rem;
   width: 100%;
-  max-width: 1100px;
+  max-width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
   position: relative;
@@ -81,6 +81,14 @@
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+  .cards-grid {
+    gap: 1.5rem;
+    padding: 1rem;
+  }
 }
 
 .career-card {
@@ -418,12 +426,18 @@
   border-color: var(--primary-yellow);
 }
 
-/* Responsive */
+/* Responsive - Mobile */
 @media (max-width: 768px) {
+  .career-cards-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   .cards-header {
     flex-direction: column;
     align-items: stretch;
-    padding: 0 0.25rem;
+    padding: 0 0.5rem;
+    width: 100%;
   }
 
   .section-title {
@@ -434,11 +448,20 @@
   .filter-buttons {
     justify-content: center;
     width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filter-buttons::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-btn {
-    flex: 1;
-    min-width: 100px;
+    flex-shrink: 0;
+    min-width: 90px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
   }
 
   .avatar-btn {
@@ -448,6 +471,9 @@
 
   .cards-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+  }
     padding: 0.25rem;
     gap: 0.75rem;
   }
