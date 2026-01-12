@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Cache - Lanna Poly Kiosk</title>
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 { font-size: 2.5em; margin-bottom: 20px; }
+    p { font-size: 1.2em; margin-bottom: 30px; }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .countdown {
+      font-size: 3em;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h1>🔄 กำลังอัปเดต</h1>
+    <p>กำลังล้าง cache และโหลดเวอร์ชันใหม่...</p>
+    <div class="countdown" id="countdown">3</div>
+  </div>
+
+  <script>
+    (async function() {
+      // Clear everything
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Unregister service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      
+      // Countdown and redirect
+      let count = 3;
+      const countdownEl = document.getElementById('countdown');
+      
+      const interval = setInterval(() => {
+        count--;
+        countdownEl.textContent = count;
+        
+        if (count <= 0) {
+          clearInterval(interval);
+          // Redirect to home with cache-busting parameters
+          const timestamp = Date.now();
+          window.location.href = '/?v=2026.01.12.18.00&t=' + timestamp + '&cleared=1';
+        }
+      }, 1000);
+    })();
+  </script>
+</body>
+</html>
