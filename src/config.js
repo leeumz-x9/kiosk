@@ -1,3 +1,7 @@
+// App Version - Update timestamp to force cache refresh
+export const APP_VERSION = '2026.01.12.17.30';
+export const BUILD_TIMESTAMP = Date.now();
+
 // Firebase Configuration
 export const firebaseConfig = {
   apiKey: "AIzaSyBD7qwPXdRdzdKTKE9XgT20g1dV7iH49Jo",
