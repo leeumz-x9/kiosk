@@ -29,7 +29,7 @@ const AdSlideshow = ({ onInteraction }) => {
       id: 1,
       type: 'image',
       title: 'ยินดีต้อนรับสู่',
-      subtitle: 'วิทยาลัยเทคนิคโปลิเทคนิคลานนา เชียงใหม่',
+      subtitle: 'วิทยาลัยเทคโนโลยีโปลิเทคนิคลานนา เชียงใหม่',
       description: 'สถาบันการศึกษาชั้นนำด้านช่างอุตสาหกรรมและเทคโนโลยี',
       image: '/images/activities/1.jpg',
       gradient: 'linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%)',
