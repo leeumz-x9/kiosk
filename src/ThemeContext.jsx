@@ -17,23 +17,23 @@ export const ThemeProvider = ({ children }) => {
     cyberpunk: {
       name: '🌃 Cyberpunk',
       colors: {
-        '--primary-color': '#00FF41',
-        '--secondary-color': '#39FF14',
-        '--accent-color': '#00FFFF',
-        '--error-color': '#FF0080',
+        '--primary-green': '#00FF41',
+        '--primary-yellow': '#39FF14',
+        '--primary-blue': '#00FFFF',
+        '--accent-red': '#FF0080',
         '--bg-dark': '#000000',
         '--bg-card': '#0A0A0A',
         '--text-primary': '#FFFFFF',
-        '--text-secondary': '#00FF41',
+        '--text-secondary': '#A0A0A0',
       }
     },
     ocean: {
       name: '🌊 Ocean',
       colors: {
-        '--primary-color': '#00D9FF',
-        '--secondary-color': '#1E90FF',
-        '--accent-color': '#4169E1',
-        '--error-color': '#FF6B9D',
+        '--primary-green': '#00D9FF',
+        '--primary-yellow': '#1E90FF',
+        '--primary-blue': '#4169E1',
+        '--accent-red': '#FF6B9D',
         '--bg-dark': '#001B2E',
         '--bg-card': '#003459',
         '--text-primary': '#FFFFFF',
@@ -43,10 +43,10 @@ export const ThemeProvider = ({ children }) => {
     sunset: {
       name: '🌅 Sunset',
       colors: {
-        '--primary-color': '#FF6B35',
-        '--secondary-color': '#FFB347',
-        '--accent-color': '#FF1744',
-        '--error-color': '#D32F2F',
+        '--primary-green': '#FF6B35',
+        '--primary-yellow': '#FFB347',
+        '--primary-blue': '#FF1744',
+        '--accent-red': '#D32F2F',
         '--bg-dark': '#1A0F0F',
         '--bg-card': '#2D1515',
         '--text-primary': '#FFFFFF',
@@ -56,10 +56,10 @@ export const ThemeProvider = ({ children }) => {
     forest: {
       name: '🌲 Forest',
       colors: {
-        '--primary-color': '#2ECC71',
-        '--secondary-color': '#27AE60',
-        '--accent-color': '#F39C12',
-        '--error-color': '#E74C3C',
+        '--primary-green': '#2ECC71',
+        '--primary-yellow': '#27AE60',
+        '--primary-blue': '#F39C12',
+        '--accent-red': '#E74C3C',
         '--bg-dark': '#0F1C14',
         '--bg-card': '#1A2F21',
         '--text-primary': '#FFFFFF',
@@ -69,10 +69,10 @@ export const ThemeProvider = ({ children }) => {
     purple: {
       name: '💜 Purple Dream',
       colors: {
-        '--primary-color': '#9B59B6',
-        '--secondary-color': '#8E44AD',
-        '--accent-color': '#E91E63',
-        '--error-color': '#F44336',
+        '--primary-green': '#9B59B6',
+        '--primary-yellow': '#8E44AD',
+        '--primary-blue': '#E91E63',
+        '--accent-red': '#F44336',
         '--bg-dark': '#1A0F21',
         '--bg-card': '#2D1B3D',
         '--text-primary': '#FFFFFF',
@@ -82,10 +82,10 @@ export const ThemeProvider = ({ children }) => {
     golden: {
       name: '✨ Golden',
       colors: {
-        '--primary-color': '#FFD700',
-        '--secondary-color': '#FFA500',
-        '--accent-color': '#FF6347',
-        '--error-color': '#DC143C',
+        '--primary-green': '#FFD700',
+        '--primary-yellow': '#FFA500',
+        '--primary-blue': '#FF6347',
+        '--accent-red': '#DC143C',
         '--bg-dark': '#1C1810',
         '--bg-card': '#2D2418',
         '--text-primary': '#FFFFFF',
